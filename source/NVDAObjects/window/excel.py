@@ -314,8 +314,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			return False
 
 	def navigationHelper(self,direction):
-		excelWindowObject=self.rootNVDAObject.excelWindowObject
-		cellPosition = excelWindowObject.activeCell
+		self.excelWindowObject=self.rootNVDAObject.excelWindowObject
+		self.cellPosition = self.excelWindowObject.activeCell
 		try:
 			if   direction == "left":
 				cellPosition = cellPosition.Offset(0,-1)
@@ -422,6 +422,54 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	# Translators: the description for the elements list command in Microsoft Excel.
 	script_elementsList.__doc__ = _("Lists various types of elements in this spreadsheet")
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
+	
+	def getColumnNameFromNumber(self,colNum):
+		 colList = (self.rootNVDAObject.excelWorksheetObject.Cells(1, colNum).Address(True, False)).split('$')
+		 return ''.join(colList)[:-1]
+ 
+	def script_readRow(self,gesture):
+		self.navigationHelper(-1)
+		ws = self.rootNVDAObject.excelWorksheetObject
+		currentRow = self.cellPosition.Row
+		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
+		col = 1
+		while col <= lastColumn:
+			if ws.Cells(currentRow,col).MergeCells:
+				mergedAreaColumnCount = ws.Cells(currentRow,col).MergeArea.columns.count
+				# Translators: the description for the Column Span of a Merged Area in excel Browse Mode
+				locationText = _("Column {fromCol} to {toCol}".format(fromCol=self.getColumnNameFromNumber(col),toCol=self.getColumnNameFromNumber(col+mergedAreaColumnCount-1))) if mergedAreaColumnCount > 1 else _("Column {singleCol}".format(singleCol=self.getColumnNameFromNumber(col)))
+				cellValueText = ws.Cells(currentRow,col).Text
+				col += mergedAreaColumnCount
+			else:
+				# Translators: the description for the Column Name of current cell in a row in excel Browse Mode
+				locationText = _("Column {colName}".format(colName=self.getColumnNameFromNumber(col)))
+				cellValueText = ws.Cells(currentRow,col).Text
+				col += 1
+			if cellValueText:
+				ui.message(locationText)
+				ui.message(cellValueText)
+ 
+	def script_readColumn(self,gesture):
+		self.navigationHelper(-1)
+		ws = self.rootNVDAObject.excelWorksheetObject
+		currentCol = self.cellPosition.Column
+		lastRow = ws.Cells(ws.Rows.Count, currentCol).End(xlUp).Row
+		row = 1
+		while row <= lastRow:
+			if ws.Cells(row,currentCol).MergeCells:
+				mergedAreaRowCount = ws.Cells(row,currentCol).MergeArea.rows.count
+				# Translators: the description for the Row Span of a Merged Area in excel Browse Mode
+				locationText = _("Row {fromRow} to {toRow}".format(fromRow=row,toRow=row+mergedAreaRowCount-1)) if mergedAreaRowCount > 1 else _("Row {rowNum}".format(rowNum=row))
+				cellValueText = ws.Cells(row,currentCol).Text
+				row += mergedAreaRowCount
+			else:
+				# Translators: the description for the row number in excel Browse Mode
+				locationText = _("Row {rowNum}".format(rowNum=row))
+				cellValueText = ws.Cells(row,currentCol).Text
+				row += 1
+			if cellValueText:
+				ui.message(locationText)
+				ui.message(cellValueText)
 
 	__gestures = {
 		"kb:upArrow": "moveUp",
@@ -432,6 +480,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		"kb:control+downArrow":"endOfColumn",
 		"kb:control+leftArrow":"startOfRow",
 		"kb:control+rightArrow":"endOfRow",
+		"kb:control+alt+,":"readRow",
+		"kb:control+alt+.":"readColumn",
 		"kb:enter": "activatePosition",
 		"kb(desktop):numpadEnter":"activatePosition",
 		"kb:space": "activatePosition",
