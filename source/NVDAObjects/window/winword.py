@@ -34,6 +34,7 @@ import controlTypes
 import treeInterceptorHandler
 import browseMode
 import review
+import inputCore
 from cursorManager import CursorManager, ReviewCursorManager
 from tableUtils import HeaderCellInfo, HeaderCellTracker
 from . import Window
@@ -591,6 +592,7 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 				field['name']=name
 				field['alwaysReportName']=True
 				field['role']=controlTypes.ROLE_FRAME
+
 		# Hack support for lazy fetching of row and column header text values
 		class ControlField(textInfos.ControlField): 
 			def get(d,name,default=None):
@@ -1563,10 +1565,21 @@ class WordChart(Window):
 		self.reportSeriesSummary()
 	script_reportSeriesSummary.canPropagate=True
 
+	def script_activatePosition(self,gesture):
+		# Toggle browse mode pass-through.
+		self.passThrough = True
+		browseMode.reportPassThrough(self)
+	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
+	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
+	script_activatePosition.category=inputCore.SCRCAT_BROWSEMODE
+
 	__gestures = {
 		"kb:NVDA+t" : "reportTitle",
 		"kb:NVDA+shift+1" : "reportCategoryAxis",
 		"kb:NVDA+shift+2" : "reportValueAxis",
 		"kb:NVDA+shift+3" : "reportSeriesAxis",
 		"kb:NVDA+shift+4" : "reportSeriesSummary",
+		"kb:enter": "activatePosition",
+		"kb(desktop):numpadEnter":"activatePosition",
+		"kb:space": "activatePosition",
 	}

@@ -75,7 +75,6 @@ using namespace std;
 #define wdDISPID_SPELLINGERRORS_COUNT 1
 #define wdDISPID_RANGE_APPLICATION 1000
 #define wdDISPID_APPLICATION_ISSANDBOX 492
-
 #define wdDISPID_RANGE_FONT 5
 #define wdDISPID_FONT_COLOR 159
 #define wdDISPID_FONT_BOLD 130
@@ -108,6 +107,10 @@ using namespace std;
 #define wdDISPID_INLINESHAPE_TYPE 6
 #define wdDISPID_INLINESHAPE_ALTERNATIVETEXT 131
 #define wdDISPID_INLINESHAPE_TITLE 158
+#define wdDISPID_INLINESHAPE_HASCHART 148
+#define wdDISPID_INLINESHAPE_CHART 149
+#define wdDISPID_CHART_CHARTTITLE 1610743811
+#define wdDISPID_CHART_HASTITLE 1610743809
 #define wdDISPID_RANGE_HYPERLINKS 156
 #define wdDISPID_HYPERLINKS_COUNT 1
 #define wdDISPID_RANGE_COMMENTS 56
@@ -685,9 +688,12 @@ inline int getInlineShapesCount(IDispatch* pDispatchRange) {
 inline int generateInlineShapeXML(IDispatch* pDispatchRange, int offset, wostringstream& XMLStream) {
 	IDispatchPtr pDispatchShapes=NULL;
 	IDispatchPtr pDispatchShape=NULL;
+	IDispatchPtr pDispatchChart=NULL;
 	int count=0;
 	int shapeType=0;
 	BSTR altText=NULL;
+	BOOL shapeHasChart=false;
+	BOOL chartHasTitle=false;
 	if(_com_dispatch_raw_propget(pDispatchRange,wdDISPID_RANGE_INLINESHAPES,VT_DISPATCH,&pDispatchShapes)!=S_OK||!pDispatchShapes) {
 		return 0;
 	}
@@ -698,6 +704,9 @@ inline int generateInlineShapeXML(IDispatch* pDispatchRange, int offset, wostrin
 		return 0;
 	}
 	if(_com_dispatch_raw_propget(pDispatchShape,wdDISPID_INLINESHAPE_TYPE,VT_I4,&shapeType)!=S_OK) {
+		return 0;
+	}
+	if(_com_dispatch_raw_propget(pDispatchShape,wdDISPID_INLINESHAPE_HASCHART,VT_BOOL,&shapeHasChart)!=S_OK) {
 		return 0;
 	}
 	wstring altTextStr=L"";
@@ -714,6 +723,20 @@ inline int generateInlineShapeXML(IDispatch* pDispatchRange, int offset, wostrin
 		}
 		SysFreeString(altText);
 	}
+	altText=NULL;
+	if(_com_dispatch_raw_propget(pDispatchShape,wdDISPID_INLINESHAPE_HASCHART,VT_BOOL,&shapeHasChart)==S_OK&&shapeHasChart) {
+		if(_com_dispatch_raw_propget(pDispatchShape,wdDISPID_INLINESHAPE_CHART,VT_DISPATCH,&pDispatchChart)==S_OK&&pDispatchChart) {
+			if(_com_dispatch_raw_propget(pDispatchChart,wdDISPID_CHART_HASTITLE,VT_BOOL,&chartHasTitle)==S_OK&&chartHasTitle) {
+				if(_com_dispatch_raw_propget(pDispatchChart,wdDISPID_CHART_CHARTTITLE,VT_BSTR,&altText)==S_OK&&altText) {
+					for(int i=0;altText[i]!='\0';++i) {
+						appendCharToXML(altText[i],altTextStr,true);
+					}
+					SysFreeString(altText);
+				}
+			}
+		}
+	}
+
 	XMLStream<<L"<control _startOfNode=\"1\" role=\""<<((shapeType==wdInlineShapePicture||shapeType==wdInlineShapeLinkedPicture)?L"graphic":(shapeType==wdInlineShapeChart?L"chart":L"object"))<<L"\" value=\""<<altTextStr<<L"\"";
 	if(shapeType==wdInlineShapeEmbeddedOLEObject) {
 		XMLStream<<L" shapeoffset=\""<<offset<<L"\"";
