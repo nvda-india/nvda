@@ -727,15 +727,10 @@ inline int generateInlineShapeXML(IDispatch* pDispatchRange, int offset, wostrin
 	}
 	altText=NULL;
 	if(_com_dispatch_raw_propget(pDispatchShape,wdDISPID_INLINESHAPE_HASCHART,VT_BOOL,&shapeHasChart)==S_OK&&shapeHasChart) {
-		LOG_DEBUGWARNING(L"first if");
 		if(_com_dispatch_raw_propget(pDispatchShape,wdDISPID_INLINESHAPE_CHART,VT_DISPATCH,&pDispatchChart)==S_OK&&pDispatchChart) {
-			LOG_DEBUGWARNING(L"second if");
 			if(_com_dispatch_raw_propget(pDispatchChart,wdDISPID_CHART_HASTITLE,VT_BOOL,&chartHasTitle)==S_OK&&chartHasTitle) {
-				LOG_DEBUGWARNING(L"third if");
 				if(_com_dispatch_raw_propget(pDispatchChart,wdDISPID_CHART_CHARTTITLE,VT_DISPATCH,&pDispatchChartTitle)==S_OK&&pDispatchChartTitle) {
-					LOG_DEBUGWARNING(L"fourth if");
 					if(_com_dispatch_raw_propget(pDispatchChartTitle,wdDISPID_CHARTTITLE_TEXT,VT_BSTR,&altText)==S_OK&&altText) {
-						LOG_DEBUGWARNING(L"fifth if");
 						for(int i=0;altText[i]!='\0';++i) {
 							appendCharToXML(altText[i],altTextStr,true);
 						}
