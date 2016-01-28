@@ -322,8 +322,7 @@ class WordDocumentChartQuickNavItem(WordDocumentCollectionQuickNavItem):
 		return _(u"{text}").format(text=text)
 
 	def moveTo(self):
-		log.io("\nCOUNT\t"+str(self.collectionItem.Chart.SeriesCollection().Count)+"\n")
-		self.collectionItem.Chart.Select()
+		#self.collectionItem.Chart.Select()
  		chartNVDAObj = WordChart(windowHandle=self.document.rootNVDAObject.windowHandle, wordApplicationObject=self.rangeObj.Document.Application, wordChartObject=self.collectionItem.Chart)
  		eventHandler.queueEvent("gainFocus",chartNVDAObj)
 	
@@ -1467,10 +1466,13 @@ class ElementsListDialog(browseMode.ElementsListDialog):
 	)
 
 class WordChart(Window):
-	def __init__(self,windowHandle, wordApplicationObject, wordChartObject):
+	def __init__(self,windowHandle, wordApplicationObject, wordChartObject,seriesIndex=1,pointIndex=1):
 		self.windowHandle=windowHandle
 		self.wordApplicationObject=wordApplicationObject
 		self.wordChartObject=wordChartObject
+		self.seriesCollection=self.wordChartObject.SeriesCollection()
+ 		self.currentSeriesIndex=seriesIndex
+		self.currentPointIndex=pointIndex
 		super(WordChart,self).__init__(windowHandle=windowHandle)
 
 	def _get_name(self):
@@ -1495,6 +1497,22 @@ class WordChart(Window):
 
 	def _get_role(self):
 		return controlTypes.ROLE_CHART 
+
+	def getChartSegment(self):
+		chartType = self.wordChartObject.ChartType
+		if chartType in (excelChart.xl3DPie, excelChart.xl3DPieExploded, excelChart.xlPie, excelChart.xlPieExploded, excelChart.xlPieOfPie):
+			# Translators: A slice in a pie chart.
+			text=_("slice")
+		elif chartType in (excelChart.xl3DColumn, excelChart.xl3DColumnClustered, excelChart.xl3DColumnStacked, excelChart.xl3DColumnStacked100, excelChart.xlColumnClustered, excelChart.xlColumnStacked100, excelChart.xlColumnStacked):
+			# Translators: A column in a column chart.
+			text=pgettext('chart','column')
+		elif chartType in (excelChart.xl3DLine, excelChart.xlLine, excelChart.xlLineMarkers, excelChart.xlLineMarkersStacked, excelChart.xlLineMarkersStacked100, excelChart.xlLineStacked, excelChart.xlLineStacked100):
+			# Translators: A data point in a line chart.
+			text=_("data point")
+		else:
+			# Translators: A segment of a chart for charts which don't have a specific name for segments.
+			text=_("item")
+		return text
 
 	def event_gainFocus(self):
 		ui.message(self.name)
@@ -1557,10 +1575,160 @@ class WordChart(Window):
 		self.reportSeriesSummary()
 	script_reportSeriesSummary.canPropagate=True
 
+	def getSeriesText(self,direction):
+		count=self.seriesCollection.Count
+		if count > 1:
+			if direction==-1:
+				if self.currentSeriesIndex==1:
+					self.currentSeriesIndex=count
+				else:
+					self.currentSeriesIndex=self.currentSeriesIndex-1
+			elif direction==1:
+				if self.currentSeriesIndex==count:
+					self.currentSeriesIndex=1
+				else:
+					self.currentSeriesIndex=self.currentSeriesIndex+1
+		currentSeries=self.seriesCollection[self.currentSeriesIndex]
+		# Translators: Details about a series in a chart. For example, this might report "foo series 1 of 2"
+		seriesText=_("{seriesName} series {seriesIndex} of {seriesCount}").format( seriesName = self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Name , seriesIndex = self.currentSeriesIndex , seriesCount = count )
+		return seriesText
+		
+	def script_previousSeries(self,gesture):
+		seriesText=self.getSeriesText(-1)
+		series=WordChartSeries(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, seriesName=seriesText,seriesIndex=self.currentSeriesIndex)
+		eventHandler.queueEvent("gainFocus", series )
+	script_previousSeries.canPropagate=True
+
+	def script_nextSeries(self,gesture):
+		seriesText=self.getSeriesText(1)
+ 		series=WordChartSeries(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, seriesName=seriesText, seriesIndex=self.currentSeriesIndex)
+		eventHandler.queueEvent("gainFocus", series )
+	script_nextSeries.canPropagate=True
+
+	def getPointsText(self, direction):
+		pointsCollection=self.seriesCollection[self.currentSeriesIndex].Points()
+		count=pointsCollection.count
+		if count > 1:
+			if direction==-1:
+				if self.currentPointIndex==1:
+					self.currentPointIndex=count
+				else:
+					self.currentPointIndex=self.currentPointIndex-1
+			elif direction==1:
+				if self.currentPointIndex==count:
+					self.currentPointIndex=1
+				else:
+					self.currentPointIndex=self.currentPointIndex+1
+		if isinstance( self.wordChartObject.SeriesCollection(self.currentSeriesIndex).XValues[self.currentPointIndex-1] , float):
+			excelSeriesXValue = int(self.wordChartObject.SeriesCollection(self.currentSeriesIndex).XValues[self.currentPointIndex-1] )
+		else:
+			excelSeriesXValue = self.wordChartObject.SeriesCollection(self.currentSeriesIndex).XValues[self.currentPointIndex-1]
+		output=""
+		if self.wordChartObject.ChartType in (excelChart.xlLine, excelChart.xlLineMarkers , excelChart.xlLineMarkersStacked, excelChart.xlLineMarkersStacked100, excelChart.xlLineStacked, excelChart.xlLineStacked100):
+			if self.currentPointIndex > 1:
+				if self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-1] == self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex - 2]:
+					# Translators: For line charts, indicates no change from the previous data point on the left
+					output += _( "no change from point {previousIndex}, ").format( previousIndex = self.currentPointIndex-1 )
+				elif self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-1] > self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-2]:
+					# Translators: For line charts, indicates an increase from the previous data point on the left
+					output += _( "Increased by {incrementValue} from point {previousIndex}, ").format( incrementValue = self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-1] - self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-2] , previousIndex = self.currentPointIndex-1 )
+				else:
+					# Translators: For line charts, indicates a decrease from the previous data point on the left
+					output += _( "decreased by {decrementValue} from point {previousIndex}, ").format( decrementValue = self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-2] - self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-1] , previousIndex = self.currentPointIndex-1 ) 
+		if self.wordChartObject.HasAxis(excelChart.xlCategory) and self.wordChartObject.Axes(excelChart.xlCategory).HasTitle:
+			# Translators: Specifies the category of a data point.
+			# {categoryAxisTitle} will be replaced with the title of the category axis; e.g. "Month".
+			# {categoryAxisData} will be replaced with the category itself; e.g. "January".
+			output += _( "{categoryAxisTitle} {categoryAxisData}: ").format( categoryAxisTitle = self.wordChartObject.Axes(excelChart.xlCategory).AxisTitle.Text , categoryAxisData = excelSeriesXValue ) 
+		else:
+			# Translators: Specifies the category of a data point.
+			# {categoryAxisData} will be replaced with the category itself; e.g. "January".
+			output += _( "Category {categoryAxisData}: ").format( categoryAxisData = excelSeriesXValue ) 
+		if self.wordChartObject.HasAxis(excelChart.xlValue) and self.wordChartObject.Axes(excelChart.xlValue).HasTitle:
+			# Translators: Specifies the value of a data point.
+			# {valueAxisTitle} will be replaced with the title of the value axis; e.g. "Amount".
+			# {valueAxisData} will be replaced with the value itself; e.g. "1000".
+			output +=  _( "{valueAxisTitle} {valueAxisData}").format( valueAxisTitle = self.wordChartObject.Axes(excelChart.xlValue).AxisTitle.Text , valueAxisData = self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex])
+		else:
+			# Translators: Specifies the value of a data point.
+			# {valueAxisData} will be replaced with the value itself; e.g. "1000".
+			output +=  _( "value {valueAxisData}").format( valueAxisData = self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-1])
+		if self.wordChartObject.ChartType in (excelChart.xlPie, excelChart.xlPieExploded, excelChart.xlPieOfPie):
+			import math
+			total = math.fsum( self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values ) 
+			# Translators: Details about a slice of a pie chart.
+			# For example, this might report "fraction 25.25 percent slice 1 of 5"
+			output += _( " fraction {fractionValue:.2f} Percent slice {pointIndex} of {pointCount}").format( fractionValue = self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Values[self.currentPointIndex-1] / total *100.00 , pointIndex = self.currentPointIndex , pointCount = count )
+		else:
+			# Translators: Details about a segment of a chart.
+			# For example, this might report "column 1 of 5"
+			output += _( " {segmentType} {pointIndex} of {pointCount}").format( segmentType = self.getChartSegment() ,  pointIndex = self.currentPointIndex , pointCount = count )
+		return output
+
+	def script_previousPoints(self,gesture):
+		pointsText=self.getPointsText(-1)
+		points=WordChartPoints(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, pointsName=pointsText, pointsIndex=self.currentPointIndex)
+		eventHandler.queueEvent("gainFocus", points )
+	script_previousPoints.canPropagate=True
+
+	def script_nextPoints(self,gesture):
+		pointsText=self.getPointsText(1)
+		points=WordChartPoints(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, pointsName=pointsText, pointsIndex=self.currentPointIndex)
+		eventHandler.queueEvent("gainFocus", points )
+	script_nextPoints.canPropagate=True
+
+	def script_activatePosition(self,gesture):
+		# Toggle browse mode pass-through.
+		self.passThrough = True
+		self.ignoreTreeInterceptorPassThrough=False
+		browseMode.reportPassThrough(self)
+	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
+	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
+	script_activatePosition.category=inputCore.SCRCAT_BROWSEMODE
+
+	def script_disablePassThrough(self, gesture):
+		self.passThrough = False
+		#browseMode.reportPassThrough(self)
+	script_disablePassThrough.ignoreTreeInterceptorPassThrough = True
+
 	__gestures = {
 		"kb:NVDA+t" : "reportTitle",
 		"kb:NVDA+shift+1" : "reportCategoryAxis",
 		"kb:NVDA+shift+2" : "reportValueAxis",
 		"kb:NVDA+shift+3" : "reportSeriesAxis",
 		"kb:NVDA+shift+4" : "reportSeriesSummary",
+		"kb:enter": "activatePosition",
+		"kb(desktop):numpadEnter":"activatePosition",
+		"kb:space": "activatePosition",
+		"kb:escape": "disablePassThrough",
+		"kb(laptop):upArrow": "previousSeries",
+		"kb(desktop):upArrow": "previousSeries",
+		"kb(laptop):downArrow": "nextSeries",
+		"kb(desktop):downArrow": "nextSeries",
+		"kb(laptop):leftArrow":"previousPoints",
+		"kb(desktop):leftArrow":"previousPoints",
+		"kb(laptop):rightArrow":"nextPoints",
+		"kb(desktop):rightArrow":"nextPoints",
 	}
+
+class WordChartSeries(WordChart):
+	def __init__(self, windowHandle, wordApplicationObject, wordChartObject,seriesName,seriesIndex):
+		self.seriesName=seriesName
+		super(WordChartSeries,self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordChartObject=wordChartObject, seriesIndex=seriesIndex)
+
+	def _get_name(self):
+		return self.seriesName
+
+	def event_gainFocus(self):
+		ui.message(self.name)
+
+class WordChartPoints(WordChart):
+	def __init__(self,windowHandle, wordApplicationObject, wordChartObject, pointsName, pointsIndex):
+		self.pointsName=pointsName
+		super(WordChartPoints,self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordChartObject=wordChartObject, pointIndex=pointsIndex)
+
+	def _get_name(self):
+		return self.pointsName
+
+	def event_gainFocus(self):
+		ui.message(self.name)
