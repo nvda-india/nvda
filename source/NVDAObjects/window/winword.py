@@ -1578,12 +1578,12 @@ class WordChart(Window):
 	def getSeriesText(self,direction):
 		count=self.seriesCollection.Count
 		if count > 1:
-			if direction==-1:
+			if direction=="previous":
 				if self.currentSeriesIndex==1:
 					self.currentSeriesIndex=count
 				else:
 					self.currentSeriesIndex=self.currentSeriesIndex-1
-			elif direction==1:
+			elif direction=="next":
 				if self.currentSeriesIndex==count:
 					self.currentSeriesIndex=1
 				else:
@@ -1594,14 +1594,16 @@ class WordChart(Window):
 		return seriesText
 		
 	def script_previousSeries(self,gesture):
-		seriesText=self.getSeriesText(-1)
+		seriesText=self.getSeriesText("previous")
 		series=WordChartSeries(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, seriesName=seriesText,seriesIndex=self.currentSeriesIndex)
+		self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Select()
 		eventHandler.queueEvent("gainFocus", series )
 	script_previousSeries.canPropagate=True
 
 	def script_nextSeries(self,gesture):
-		seriesText=self.getSeriesText(1)
+		seriesText=self.getSeriesText("next")
  		series=WordChartSeries(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, seriesName=seriesText, seriesIndex=self.currentSeriesIndex)
+ 		self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Select()
 		eventHandler.queueEvent("gainFocus", series )
 	script_nextSeries.canPropagate=True
 
@@ -1609,12 +1611,12 @@ class WordChart(Window):
 		pointsCollection=self.seriesCollection[self.currentSeriesIndex].Points()
 		count=pointsCollection.count
 		if count > 1:
-			if direction==-1:
+			if direction=="previous":
 				if self.currentPointIndex==1:
 					self.currentPointIndex=count
 				else:
 					self.currentPointIndex=self.currentPointIndex-1
-			elif direction==1:
+			elif direction=="next":
 				if self.currentPointIndex==count:
 					self.currentPointIndex=1
 				else:
@@ -1665,17 +1667,19 @@ class WordChart(Window):
 			output += _( " {segmentType} {pointIndex} of {pointCount}").format( segmentType = self.getChartSegment() ,  pointIndex = self.currentPointIndex , pointCount = count )
 		return output
 
-	def script_previousPoints(self,gesture):
-		pointsText=self.getPointsText(-1)
-		points=WordChartPoints(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, pointsName=pointsText, pointsIndex=self.currentPointIndex)
+	def script_previousPoint(self,gesture):
+		pointsText=self.getPointsText("previous")
+		points=WordChartPoint(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, pointsName=pointsText, pointsIndex=self.currentPointIndex)
+		self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Points(self.currentPointIndex).Select()
 		eventHandler.queueEvent("gainFocus", points )
-	script_previousPoints.canPropagate=True
+	script_previousPoint.canPropagate=True
 
-	def script_nextPoints(self,gesture):
-		pointsText=self.getPointsText(1)
-		points=WordChartPoints(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, pointsName=pointsText, pointsIndex=self.currentPointIndex)
+	def script_nextPoint(self,gesture):
+		pointsText=self.getPointsText("next")
+		points=WordChartPoint(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, pointsName=pointsText, pointsIndex=self.currentPointIndex)
+		self.wordChartObject.SeriesCollection(self.currentSeriesIndex).Points(self.currentPointIndex).Select()
 		eventHandler.queueEvent("gainFocus", points )
-	script_nextPoints.canPropagate=True
+	script_nextPoint.canPropagate=True
 
 	def script_activatePosition(self,gesture):
 		# Toggle browse mode pass-through.
@@ -1705,10 +1709,10 @@ class WordChart(Window):
 		"kb(desktop):upArrow": "previousSeries",
 		"kb(laptop):downArrow": "nextSeries",
 		"kb(desktop):downArrow": "nextSeries",
-		"kb(laptop):leftArrow":"previousPoints",
-		"kb(desktop):leftArrow":"previousPoints",
-		"kb(laptop):rightArrow":"nextPoints",
-		"kb(desktop):rightArrow":"nextPoints",
+		"kb(laptop):leftArrow":"previousPoint",
+		"kb(desktop):leftArrow":"previousPoint",
+		"kb(laptop):rightArrow":"nextPoint",
+		"kb(desktop):rightArrow":"nextPoint",
 	}
 
 class WordChartSeries(WordChart):
@@ -1722,10 +1726,10 @@ class WordChartSeries(WordChart):
 	def event_gainFocus(self):
 		ui.message(self.name)
 
-class WordChartPoints(WordChart):
+class WordChartPoint(WordChart):
 	def __init__(self,windowHandle, wordApplicationObject, wordChartObject, pointsName, pointsIndex):
 		self.pointsName=pointsName
-		super(WordChartPoints,self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordChartObject=wordChartObject, pointIndex=pointsIndex)
+		super(WordChartPoint,self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordChartObject=wordChartObject, pointIndex=pointsIndex)
 
 	def _get_name(self):
 		return self.pointsName
