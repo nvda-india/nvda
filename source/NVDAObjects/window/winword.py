@@ -35,6 +35,7 @@ import treeInterceptorHandler
 import browseMode
 import review
 import inputCore
+import api
 from cursorManager import CursorManager, ReviewCursorManager
 from tableUtils import HeaderCellInfo, HeaderCellTracker
 from . import Window
@@ -1691,9 +1692,7 @@ class WordChart(Window):
 	script_activatePosition.category=inputCore.SCRCAT_BROWSEMODE
 
 	def script_disablePassThrough(self, gesture):
-		self.passThrough = False
-		#browseMode.reportPassThrough(self)
-	script_disablePassThrough.ignoreTreeInterceptorPassThrough = True
+		eventHandler.executeEvent("gainFocus", api.getDesktopObject().objectWithFocus())
 
 	__gestures = {
 		"kb:NVDA+t" : "reportTitle",
