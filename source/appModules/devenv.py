@@ -51,6 +51,8 @@ from NVDAObjects.window import DisplayModelEditableText
 
 import appModuleHandler
 
+from NVDAObjects.IAccessible import IAccessible
+from NVDAObjects.UIA import UIA
 
 #
 # A few helpful constants
@@ -90,6 +92,17 @@ class AppModule(appModuleHandler.AppModule):
 	def chooseNVDAObjectOverlayClasses(self, obj, clsList):
 		# Only use this overlay class if the top level automation object for the IDE can be retrieved,
 		# as it will not work otherwise.
+		if obj.name== "Active Files" and obj.role==4:
+			count=obj.getChild(1).childCount
+			for i in range(0,count):
+				if obj.getChild(1).getChild(i).hasFocus:
+					obj.name=obj.getChild(1).getChild(i).name
+					obj.role=obj.getChild(1).getChild(i).role
+		if (obj.hasFocus is not True) and isinstance(obj,IAccessible):
+			 clsList.insert(0, VsTest)
+		if (obj.hasFocus==False or obj.hasFocus==0) and isinstance(obj,UIA):
+			 clsList.insert(0, VsTestOne)
+# 		log.info("\nObj Name:%s\nObj hasFocus:%s\nIsIaccessible:%s\nIsUIA:%s\n",obj.name,obj.hasFocus,isinstance(obj,IAccessible),isinstance(obj,UIA))
 		if obj.windowClassName == VsTextEditPaneClassName and self._getDTE():
 			try:
 				clsList.remove(DisplayModelEditableText)
@@ -244,6 +257,22 @@ class VsTextEditPane(EditableTextWithoutAutoSelectDetection,Window):
 
 	def event_valueChange(self):
 		pass
+	
+class VsTest(IAccessible):
+	def _get_name(self):
+		return None
+	
+	def _get_role(self):
+		return 0
+	#shouldAllowIAccessibleFocusEvent = False
+# 	
+class VsTestOne(UIA):
+	def _get_name(self):
+		return None
+	
+	def _get_role(self):
+		return 0
+	#shouldAllowUIAFocusEvent = False
 
 
 class IVsTextView(IUnknown):
