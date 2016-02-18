@@ -1829,15 +1829,12 @@ class WordChartSeries(WordChart):
 		
 	def script_previousPoint(self,gesture):
 		self.currentPointIndex=self.getPointIndex("previous")
-		if self.currentPointIndex:
-			point=WordChartPoint(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, keyIndex=self.keyIndex, seriesIndex=self.seriesIndex, pointIndex=self.currentPointIndex)
-			eventHandler.queueEvent("gainFocus", point )
+		point=WordChartPoint(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, keyIndex=self.keyIndex, seriesIndex=self.seriesIndex, pointIndex=self.currentPointIndex)
+		eventHandler.queueEvent("gainFocus", point )
 	script_previousPoint.canPropagate=True
 
 	def script_nextPoint(self,gesture):
 		self.currentPointIndex=self.getPointIndex("next")
-		log.io("\nself.currentPointIndex\t"+str(self.currentPointIndex)+"\n")
-# 		if self.currentPointIndex:
 		point=WordChartPoint(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, keyIndex=self.keyIndex, seriesIndex=self.seriesIndex, pointIndex=self.currentPointIndex)
 		eventHandler.queueEvent("gainFocus", point )
 	script_nextPoint.canPropagate=True
