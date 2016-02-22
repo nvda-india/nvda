@@ -1621,9 +1621,10 @@ class WordChartElement(WordChart):
 		self.wordChartObject=wordChartObject
 		self.otherChartElements={}
 		self.elementKeyList=[]
-		self._axisMap={1: {1: 'Primary Category Axis', 2: 'Secondary Category Axis'},
-					   2: {1: 'Primary Value Axis', 2: 'Secondary Value Axis'},
-					   3: {1: 'Primary Series Axis', 2: 'Secondary Series Axis'}
+		# Translators: Identifyting Axes in Charts based on axisType and axisGroup
+		self._axisMap={excelChart.xlCategory: {excelChart.xlPrimary: 'Primary Category Axis', excelChart.xlSecondary: 'Secondary Category Axis'},
+					   excelChart.xlValue: {excelChart.xlPrimary: 'Primary Value Axis', excelChart.xlSecondary: 'Secondary Value Axis'},
+					   excelChart.xlSeriesAxis: {excelChart.xlPrimary: 'Primary Series Axis', excelChart.xlSecondary: 'Secondary Series Axis'}
 					  }
 		if self.wordChartObject.HasTitle:
 			self.otherChartElements['chartTitle']=(self.focusChartTitle, None)
@@ -1794,7 +1795,7 @@ class WordChartAxisTitle(WordChartElement):
 		ui.message(self.name)
 	
 class WordChartSeries(WordChart):
-	def __init__(self,windowHandle, wordApplicationObject, wordChartObject, keyIndex, seriesIndex, pointIndex=0):
+	def __init__(self,windowHandle, wordApplicationObject, wordChartObject, keyIndex, seriesIndex, pointIndex=1):
 		self.seriesIndex=seriesIndex
 		self.currentPointIndex=pointIndex
 		self.keyIndex=keyIndex
@@ -1816,13 +1817,13 @@ class WordChartSeries(WordChart):
 	def getPointIndex(self, direction):
 		if self.pointsCount > 1:
 			if direction=="previous":
-				if self.currentPointIndex==0:
-					self.currentPointIndex=self.pointsCount-1
+				if self.currentPointIndex==1:
+					self.currentPointIndex=self.pointsCount
 				else:
 					self.currentPointIndex=self.currentPointIndex-1
 			elif direction=="next":
-				if self.currentPointIndex==self.pointsCount-1:
-					self.currentPointIndex=0
+				if self.currentPointIndex==self.pointsCount:
+					self.currentPointIndex=1
 				else:
 					self.currentPointIndex=self.currentPointIndex+1
 		return self.currentPointIndex
@@ -1839,16 +1840,25 @@ class WordChartSeries(WordChart):
 		eventHandler.queueEvent("gainFocus", point )
 	script_nextPoint.canPropagate=True
 
+	def script_reportColor(self, gesture):
+		if self.wordChartObject.ChartType in (excelChart.xlPie, excelChart.xlPieExploded, excelChart.xlPieOfPie):
+			#Translators: Message to be spoken to report Slice Color in Pie Chart
+			ui.message ( _( "Slice color: {colorName} ").format(colorName=colors.RGB.fromCOLORREF(int( self.wordChartObject.SeriesCollection( self.seriesIndex ).Points(self.currentPointIndex).Format.Fill.ForeColor.RGB) ).name  ) )
+		else:
+			#Translators: Message to be spoken to report Series Color
+			ui.message ( _( "Series color: {colorName} ").format(colorName=colors.RGB.fromCOLORREF(int( self.wordChartObject.SeriesCollection( self.seriesIndex ).Interior.Color ) ).name  ) )
+
 	__gestures = {
 		"kb(laptop):leftArrow":"previousPoint",
 		"kb(desktop):leftArrow":"previousPoint",
 		"kb(laptop):rightArrow":"nextPoint",
 		"kb(desktop):rightArrow":"nextPoint",
+		"kb:NVDA+5": "reportColor",
 		}
 
 class WordChartPoint(WordChartSeries):
     def __init__(self,windowHandle, wordApplicationObject, wordChartObject, keyIndex, seriesIndex, pointIndex):
-        self.pointIndex=pointIndex+1
+        self.pointIndex=pointIndex
         self.seriesIndex=seriesIndex
         super(WordChartPoint,self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordChartObject=wordChartObject, keyIndex=keyIndex, seriesIndex=seriesIndex, pointIndex=pointIndex)
 
