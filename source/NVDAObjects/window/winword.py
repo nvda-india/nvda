@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 #appModules/winword.py
 #A part of NonVisual Desktop Access (NVDA)
 #Copyright (C) 2006-2015 NV Access Limited, Manish Agrawal
@@ -36,6 +37,7 @@ import browseMode
 import review
 import inputCore
 import api
+import re
 from cursorManager import CursorManager, ReviewCursorManager
 from tableUtils import HeaderCellInfo, HeaderCellTracker
 from . import Window
@@ -260,6 +262,14 @@ formatConfigFlagsMap={
 	"reportParagraphIndentation":65536,
 }
 formatConfigFlag_includeLayoutTables=131072
+
+#XlTrendlineType Enumeration
+xlExponential=5
+xlLinear=-4132
+xlLogarithmic=-4133
+xlMovingAvg=6
+xlPolynomial=3
+xlPower=4
 
 class WordDocumentHeadingQuickNavItem(browseMode.TextInfoQuickNavItem):
 
@@ -1483,10 +1493,22 @@ class WordChart(Window):
 				key='series'+str(i+1)
 				self.chartElements[key]=(self.focusChartSeries,i+1)
 				self.keyList.append(key)
+				try:
+					trendlinesCount = self.wordChartObject.SeriesCollection(i+1).Trendlines().Count
+				except:
+					trendlinesCount = None
+				if trendlinesCount>=1:
+					key=key+"Trendline"
+					self.chartElements[key]=(self.focusSeriesTrendline,i+1)
+					self.keyList.append(key)
 		self.chartElements['otherElements']=(self.focusChartElement, None)
 		self.keyList.append('otherElements')
 		self.elementsCount=len(self.keyList)
 		super(WordChart,self).__init__(windowHandle=windowHandle)
+
+	def focusSeriesTrendline(self, seriesIndex):
+		obj=WordChartSeriesTrendline(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, keyIndex=self.keyIndex, seriesIndex=seriesIndex)
+		eventHandler.queueEvent('gainFocus',obj)
 
 	def focusChartSeries(self, seriesIndex):
 		self.currentSeriesIndex=seriesIndex
@@ -1611,6 +1633,70 @@ class WordChart(Window):
 		"kb:escape": "disablePassThrough",
 		}
 
+class WordChartSeriesTrendline(WordChart):
+    def __init__(self, windowHandle, wordApplicationObject, wordChartObject, keyIndex, seriesIndex, trendlineIndex=1):
+        self.windowHandle=windowHandle
+        self.wordApplicationObject=wordApplicationObject
+        self.seriesIndex=seriesIndex
+        self.trendlineIndex=trendlineIndex
+        self.trendlinesCount=wordChartObject.SeriesCollection(self.seriesIndex).Trendlines().Count
+        self._trendlineTypeMap = {xlExponential: 'Exponential',
+                                xlLinear: 'Linear',
+                                xlLogarithmic: 'Logarithmic',
+                                xlMovingAvg: 'Moving Average',
+                                xlPolynomial: 'Polynomial',
+                                xlPower: 'Power' }
+        super(WordChartSeriesTrendline, self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordChartObject=wordChartObject, keyIndex=keyIndex)
+
+    def _get_name(self):
+		if self.wordChartObject.SeriesCollection(self.seriesIndex).Trendlines(self.trendlineIndex).DisplayEquation or self.wordChartObject.SeriesCollection(self.seriesIndex).Trendlines(self.trendlineIndex).DisplayRSquared:
+			label=self.wordChartObject.SeriesCollection(self.seriesIndex).Trendlines(self.trendlineIndex).DataLabel.Text
+			#Translators: Substitute superscript two by square for R square value
+			label=label.replace(u"²", _( " square " ))
+			#Translators: Substitute x2 by x square
+			label=re.sub(r'([a-zA-Z]+)([2])',r'\1 square', label)
+			#Translators: Substitute x3 by x cube
+			label=re.sub(r'([a-zA-Z]+)([3])',r'\1 cube', label)
+			#Translators: Substitute x followed by Integer by x to the power Integer
+			label=re.sub(r'([a-zA-Z]+)([-]*[04-9][0-9]*)',r'\1 to the power \2', label)
+			#Translators: Substitute - by minus in trendline equations.
+			label=label.replace(u"-",_(" minus "))
+			# Translators: This message gives trendline type and name for selected series
+			output=_("{seriesName} trendline type: {trendlineType}, name: {trendlineName}, label: {trendlineLabel} ").format(seriesName=self.wordChartObject.SeriesCollection(self.seriesIndex).Name, trendlineType=self._trendlineTypeMap[self.wordChartObject.SeriesCollection(self.seriesIndex).Trendlines(self.trendlineIndex).Type], trendlineName=self.wordChartObject.SeriesCollection(self.seriesIndex).Trendlines(self.trendlineIndex).Name, trendlineLabel=label)
+		else:
+			# Translators: This message gives trendline type and name for selected series
+			output=_("{seriesName} trendline type: {trendlineType}, name: {trendlineName} ").format(seriesName=self.wordChartObject.SeriesCollection(self.seriesIndex).Name, trendlineType=self._trendlineTypeMap[self.wordChartObject.SeriesCollection(self.seriesIndex).Trendlines(self.trendlineIndex).Type], trendlineName=self.wordChartObject.SeriesCollection(self.seriesIndex).Trendlines(self.trendlineIndex).Name)
+		return output
+
+    def event_gainFocus(self):
+        self.wordChartObject.SeriesCollection(self.seriesIndex).Trendlines(self.trendlineIndex).Select()
+        ui.message(self.name)
+
+    def script_previousTrendline(self, gesture):
+        if self.trendlinesCount > 1:
+            if self.trendlineIndex==1:
+                self.trendlineIndex=self.trendlinesCount
+            else:
+                self.trendlineIndex=self.trendlineIndex-1
+            obj=WordChartSeriesTrendline(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, keyIndex=self.keyIndex, seriesIndex=self.seriesIndex, trendlineIndex=self.trendlineIndex)
+            eventHandler.queueEvent('gainFocus',obj)
+
+    def script_nextTrendline(self, gesture):
+        if self.trendlinesCount > 1:
+            if self.trendlineIndex==self.trendlinesCount:
+                self.trendlineIndex=1
+            else:
+                self.trendlineIndex=self.trendlineIndex+1
+            obj=WordChartSeriesTrendline(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, keyIndex=self.keyIndex, seriesIndex=self.seriesIndex, trendlineIndex=self.trendlineIndex)
+            eventHandler.queueEvent('gainFocus',obj)
+
+    __gestures = {
+        "kb(laptop):leftArrow":"previousTrendline",
+        "kb(desktop):leftArrow":"previousTrendline",
+        "kb(laptop):rightArrow":"nextTrendline",
+        "kb(desktop):rightArrow":"nextTrendline",
+        }
+
 class WordChartElement(WordChart):
 	def __init__(self,windowHandle, wordApplicationObject, wordChartObject, keyIndex, elementIndex=0):
 		self.windowHandle=windowHandle
@@ -1647,6 +1733,10 @@ class WordChartElement(WordChart):
 			self.otherChartElements['legend']=(self.focusLegend, None)
 			self.elementKeyList.append('legend')
 
+		if self.wordChartObject.HasDataTable:
+			self.otherChartElements['dataTable']=(self.focusDataTable, None)
+			self.elementKeyList.append('dataTable')
+
 		self.chartElementsCount=len(self.elementKeyList)
 		super(WordChartElement,self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordChartObject=wordChartObject, keyIndex=keyIndex)
 
@@ -1672,6 +1762,10 @@ class WordChartElement(WordChart):
 
 	def focusLegend(self):
 		obj=WordChartLegend(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject,  keyIndex=self.keyIndex, elementIndex=self.elementIndex)
+		eventHandler.queueEvent('gainFocus',obj)
+
+	def focusDataTable(self):
+		obj=WordChartDataTable(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordChartObject=self.wordChartObject, keyIndex=self.keyIndex, elementIndex=self.elementIndex)
 		eventHandler.queueEvent('gainFocus',obj)
 
 	def event_gainFocus(self):
@@ -1712,6 +1806,18 @@ class WordChartElement(WordChart):
 		"kb(laptop):rightArrow":"nextElement",
 		"kb(desktop):rightArrow":"nextElement",
 		}
+
+class WordChartDataTable(WordChartElement):
+    def __init__(self,windowHandle, wordApplicationObject, wordChartObject, keyIndex, elementIndex):
+        super(WordChartDataTable,self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordChartObject=wordChartObject, keyIndex=keyIndex, elementIndex=elementIndex)
+
+    def _get_name(self):
+        #Translators: Data Table will be spoken when chart element Data Table is selected
+        return _("Data Table")
+
+    def event_gainFocus(self):
+        self.wordChartObject.DataTable.Select()
+        ui.message(self.name)
 
 class WordChartLegend(WordChartElement):
 	def __init__(self,windowHandle, wordApplicationObject, wordChartObject, keyIndex, elementIndex):
