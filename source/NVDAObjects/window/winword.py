@@ -1544,7 +1544,7 @@ class WordChart(Window):
 
 	def event_gainFocus(self):
 		ui.message(self.name)
-		self.wordChartObject.Select()
+ 		self.wordChartObject.Select()
 		self.reportSeriesSummary()
 
 	def getChartSegment(self):
@@ -1627,6 +1627,10 @@ class WordChart(Window):
 		"kb(desktop):upArrow":"reportNextChartElement",
 		"kb(laptop):downArrow":"reportPreviousChartElement",
 		"kb(desktop):downArrow":"reportPreviousChartElement",
+		"kb(desktop):leftArrow":"reportPreviousChartElement",
+		"kb(laptop):leftArrow":"reportPreviousChartElement",
+		"kb(desktop):rightarrow":"reportNextChartElement",
+		"kb(laptop):rightArrow":"reportNextChartElement",
 		"kb:enter": "activatePosition",
 		"kb(desktop):numpadEnter":"activatePosition",
 		"kb:space": "activatePosition",
@@ -1837,7 +1841,7 @@ class WordChartArea(WordChartElement):
 
 	def _get_name(self):
 		#Translators: Chart area will be spoken when chart element chart area is selected
-		return _("Chart Area")
+		return _( "Chart area, height: {chartAreaHeight} points, width: {chartAreaWidth} points, top: {chartAreaTop} points, left: {chartAreaLeft} points").format ( chartAreaHeight = self.wordChartObject.ChartArea.Height , chartAreaWidth = self.wordChartObject.ChartArea.Width , chartAreaTop = self.wordChartObject.ChartArea.Top , chartAreaLeft = self.wordChartObject.ChartArea.Left)
 
 	def event_gainFocus(self):
 		self.wordChartObject.ChartArea.Select()
@@ -1849,7 +1853,7 @@ class WordChartPlotArea(WordChartElement):
 
 	def _get_name(self):
 		#Translators: Plot area will be spoken when chart element chart area is selected
-		return _("Plot Area")
+		return _( "Plot area, inside height: {plotAreaInsideHeight:.0f} points, inside width: {plotAreaInsideWidth:.0f} points, inside top: {plotAreaInsideTop:.0f} points, inside left: {plotAreaInsideLeft:.0f} points").format ( plotAreaInsideHeight = self.wordChartObject.PlotArea.InsideHeight , plotAreaInsideWidth = self.wordChartObject.PlotArea.InsideWidth , plotAreaInsideTop = self.wordChartObject.PlotArea.InsideTop , plotAreaInsideLeft = self.wordChartObject.PlotArea.InsideLeft )
 
 	def event_gainFocus(self):
 		self.wordChartObject.PlotArea.Select()
@@ -1900,7 +1904,7 @@ class WordChartAxisTitle(WordChartElement):
 		ui.message(self.name)
 
 class WordChartSeries(WordChart):
-	def __init__(self,windowHandle, wordApplicationObject, wordChartObject, keyIndex, seriesIndex, pointIndex=1):
+	def __init__(self,windowHandle, wordApplicationObject, wordChartObject, keyIndex, seriesIndex, pointIndex=0):
 		self.seriesIndex=seriesIndex
 		self.currentPointIndex=pointIndex
 		self.keyIndex=keyIndex
@@ -1998,7 +2002,7 @@ class WordChartPoint(WordChartSeries):
 			# Translators: Specifies the value of a data point.
 			# {valueAxisTitle} will be replaced with the title of the value axis; e.g. "Amount".
 			# {valueAxisData} will be replaced with the value itself; e.g. "1000".
-			output +=  _( "{valueAxisTitle} {valueAxisData}").format( valueAxisTitle = self.wordChartObject.Axes(excelChart.xlValue).AxisTitle.Text , valueAxisData = self.wordChartObject.SeriesCollection(self.seriesIndex).Values[self.pointIndex])
+			output +=  _( "{valueAxisTitle} {valueAxisData}").format( valueAxisTitle = self.wordChartObject.Axes(excelChart.xlValue).AxisTitle.Text , valueAxisData = self.wordChartObject.SeriesCollection(self.seriesIndex).Values[self.pointIndex-1])
 		else:
 			# Translators: Specifies the value of a data point.
 			# {valueAxisData} will be replaced with the value itself; e.g. "1000".
