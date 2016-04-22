@@ -28,6 +28,13 @@ from .. import InvalidNVDAObject
 from ..window import Window
 from NVDAObjects.UIA import UIA, UIATextInfo
 
+from urlparse import urlparse
+import wx
+import gui
+from ConfigParser import SafeConfigParser
+import os
+import globalVars
+
 IID_IHTMLElement=comtypes.GUID('{3050F1FF-98B5-11CF-BB82-00AA00BDCE0B}')
 
 class UIAMSHTMLTextInfo(UIATextInfo):
@@ -617,8 +624,31 @@ class MSHTML(IAccessible):
 				if activeID and activeID==self.HTMLNode.ID:
 					res=True
 		return res
+	
+	def getFilenameFromElementDomain(self):
+		weblink=getattr(self.HTMLNode.document,'url',"")
+ 		parsed_uri = urlparse( weblink )
+ 		domain='{uri.netloc}'.format(uri=parsed_uri)
+  		domain=domain.replace('.','_')
+  		filename=domain+'.ini'
+  		return filename
+	
+	def getCustomLabel(self,nameAttribute):
+		filename=self.getFilenameFromElementDomain()
+		config = SafeConfigParser()
+		config.read(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename))
+		try:
+			if config.get('Section', str(nameAttribute)):
+				return config.get('Section', str(nameAttribute))
+		except:
+			pass
 
 	def _get_name(self):
+		nameAttribute=self.HTMLAttributes['name']
+		name=self.getCustomLabel(nameAttribute)
+		if name:
+			return name
+		
 		ariaLabelledBy=self.HTMLAttributes['aria-labelledBy']
 		if ariaLabelledBy:
 			try:
@@ -970,6 +1000,42 @@ class MSHTML(IAccessible):
 			return ti.getControlFieldForNVDAObject(self)["language"]
 		except LookupError:
 			return None
+		
+	def script_assignCustomLabel(self, gesture):
+		nameAttribute=self.HTMLAttributes['name']
+		filename=self.getFilenameFromElementDomain()
+		config = SafeConfigParser()
+		
+		if not os.path.exists(os.path.join(globalVars.appArgs.configPath, "webLabels")):
+			os.makedirs(os.path.join(globalVars.appArgs.configPath, "webLabels"))
+			
+		config.read(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename))
+		if not config.has_section('Section'):
+			config.add_section('Section')
+			
+		try:
+			defaultCustomLabel=config.get('Section', str(nameAttribute))
+		except Exception as e:
+			defaultCustomLabel=u""
+		
+		d = wx.TextEntryDialog(gui.mainFrame, 
+			# Translators: Dialog text for 
+			_("Custom Label Edit"),
+			# Translators: Title of a dialog edit an Excel comment 
+			_("Custom Label"),
+			defaultValue=defaultCustomLabel,
+			style=wx.TE_MULTILINE|wx.OK|wx.CANCEL)
+		def callback(result):
+			if result == wx.ID_OK:
+				config.set('Section', nameAttribute, d.Value)
+				with open(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename),'w') as configfile:
+					config.write(configfile)
+		gui.runScriptModalDialog(d, callback)
+			
+			
+	__gestures = {
+		"kb:NVDA+control+tab": "assignCustomLabel",
+		}
 
 class V6ComboBox(IAccessible):
 	"""The object which receives value change events for combo boxes in MSHTML/IE 6.

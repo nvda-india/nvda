@@ -52,7 +52,14 @@ class MSHTMLTextInfo(VirtualBufferTextInfo):
 		level=None
 		accRole=attrs.get('IAccessible::role',0)
 		accRole=int(accRole) if isinstance(accRole,basestring) and accRole.isdigit() else accRole
-		nodeName=attrs.get('IHTMLDOMNode::nodeName',"")
+		nodeName=attrs.get('IHTMLDOMNode::nodeName',"") 
+		
+		nameAttribute=attrs.get('HTMLAttrib::name')
+		customLabel=self.obj.rootNVDAObject.getCustomLabel(nameAttribute)
+		log.info("\nCustomLabel is: %s\n",customLabel)
+		if customLabel:
+			attrs["name"]=customLabel
+		
 		ariaRoles=attrs.get("HTMLAttrib::role", "").split(" ")
 		#choose role
 		#Priority is aria role -> HTML tag name -> IAccessible role
