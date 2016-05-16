@@ -33,6 +33,8 @@ import colors
 import controlTypes
 import treeInterceptorHandler
 import browseMode
+import inputCore
+import api
 import review
 from cursorManager import CursorManager, ReviewCursorManager
 from tableUtils import HeaderCellInfo, HeaderCellTracker
@@ -128,6 +130,566 @@ wdContentControlBuildingBlockGallery=5
 wdContentControlDate=6
 wdContentControlGroup=7
 wdContentControlCheckBox=8
+
+wdInlineShapeSmartArt=15
+msoAutoShape=1
+msoIgxGraphic=24
+msoLine=9
+msoShapeMixed=-2
+msoShapeRectangle=1
+msoShapeParallelogram=2
+msoShapeTrapezoid=3
+msoShapeDiamond=4
+msoShapeRoundedRectangle=5
+msoShapeOctagon=6
+msoShapeIsoscelesTriangle=7
+msoShapeRightTriangle=8
+msoShapeOval=9
+msoShapeHexagon=10
+msoShapeCross=11
+msoShapeRegularPentagon=12
+msoShapeCan=13
+msoShapeCube=14
+msoShapeBevel=15
+msoShapeFoldedCorner=16
+msoShapeSmileyFace=17
+msoShapeDonut=18
+msoShapeNoSymbol=19
+msoShapeBlockArc=20
+msoShapeHeart=21
+msoShapeLightningBolt=22
+msoShapeSun=23
+msoShapeMoon=24
+msoShapeArc=25
+msoShapeDoubleBracket=26
+msoShapeDoubleBrace=27
+msoShapePlaque=28
+msoShapeLeftBracket=29
+msoShapeRightBracket=30
+msoShapeLeftBrace=31
+msoShapeRightBrace=32
+msoShapeRightArrow=33
+msoShapeLeftArrow=34
+msoShapeUpArrow=35
+msoShapeDownArrow=36
+msoShapeLeftRightArrow=37
+msoShapeUpDownArrow=38
+msoShapeQuadArrow=39
+msoShapeLeftRightUpArrow=40
+msoShapeBentArrow=41
+msoShapeUTurnArrow=42
+msoShapeLeftUpArrow=43
+msoShapeBentUpArrow=44
+msoShapeCurvedRightArrow=45
+msoShapeCurvedLeftArrow=46
+msoShapeCurvedUpArrow=47
+msoShapeCurvedDownArrow=48
+msoShapeStripedRightArrow=49
+msoShapeNotchedRightArrow=50
+msoShapePentagon=51
+msoShapeChevron=52
+msoShapeRightArrowCallout=53
+msoShapeLeftArrowCallout=54
+msoShapeUpArrowCallout=55
+msoShapeDownArrowCallout=56
+msoShapeLeftRightArrowCallout=57
+msoShapeUpDownArrowCallout=58
+msoShapeQuadArrowCallout=59
+msoShapeCircularArrow=60
+msoShapeFlowchartProcess=61
+msoShapeFlowchartAlternateProcess=62
+msoShapeFlowchartDecision=63
+msoShapeFlowchartData=64
+msoShapeFlowchartPredefinedProcess=65
+msoShapeFlowchartInternalStorage=66
+msoShapeFlowchartDocument=67
+msoShapeFlowchartMultidocument=68
+msoShapeFlowchartTerminator=69
+msoShapeFlowchartPreparation=70
+msoShapeFlowchartManualInput=71
+msoShapeFlowchartManualOperation=72
+msoShapeFlowchartConnector=73
+msoShapeFlowchartOffpageConnector=74
+msoShapeFlowchartCard=75
+msoShapeFlowchartPunchedTape=76
+msoShapeFlowchartSummingJunction=77
+msoShapeFlowchartOr=78
+msoShapeFlowchartCollate=79
+msoShapeFlowchartSort=80
+msoShapeFlowchartExtract=81
+msoShapeFlowchartMerge=82
+msoShapeFlowchartStoredData=83
+msoShapeFlowchartDelay=84
+msoShapeFlowchartSequentialAccessStorage=85
+msoShapeFlowchartMagneticDisk=86
+msoShapeFlowchartDirectAccessStorage=87
+msoShapeFlowchartDisplay=88
+msoShapeExplosion1=89
+msoShapeExplosion2=90
+msoShape4pointStar=91
+msoShape5pointStar=92
+msoShape8pointStar=93
+msoShape16pointStar=94
+msoShape24pointStar=95
+msoShape32pointStar=96
+msoShapeUpRibbon=97
+msoShapeDownRibbon=98
+msoShapeCurvedUpRibbon=99
+msoShapeCurvedDownRibbon=100
+msoShapeVerticalScroll=101
+msoShapeHorizontalScroll=102
+msoShapeWave=103
+msoShapeDoubleWave=104
+msoShapeRectangularCallout=105
+msoShapeRoundedRectangularCallout=106
+msoShapeOvalCallout=107
+msoShapeCloudCallout=108
+msoShapeLineCallout1=109
+msoShapeLineCallout2=110
+msoShapeLineCallout3=111
+msoShapeLineCallout4=112
+msoShapeLineCallout1AccentBar=113
+msoShapeLineCallout2AccentBar=114
+msoShapeLineCallout3AccentBar=115
+msoShapeLineCallout4AccentBar=116
+msoShapeLineCallout1NoBorder=117
+msoShapeLineCallout2NoBorder=118
+msoShapeLineCallout3NoBorder=119
+msoShapeLineCallout4NoBorder=120
+msoShapeLineCallout1BorderandAccentBar=121
+msoShapeLineCallout2BorderandAccentBar=122
+msoShapeLineCallout3BorderandAccentBar=123
+msoShapeLineCallout4BorderandAccentBar=124
+msoShapeActionButtonCustom=125
+msoShapeActionButtonHome=126
+msoShapeActionButtonHelp=127
+msoShapeActionButtonInformation=128
+msoShapeActionButtonBackorPrevious=129
+msoShapeActionButtonForwardorNext=130
+msoShapeActionButtonBeginning=131
+msoShapeActionButtonEnd=132
+msoShapeActionButtonReturn=133
+msoShapeActionButtonDocument=134
+msoShapeActionButtonSound=135
+msoShapeActionButtonMovie=136
+msoShapeBalloon=137
+msoShapeNotPrimitive=138
+msoShapeFlowchartOfflineStorage=139
+msoShapeLeftRightRibbon=140
+msoShapeDiagonalStripe=141
+msoShapePie=142
+msoShapeNonIsoscelesTrapezoid=143
+msoShapeDecagon=144
+msoShapeHeptagon=145
+msoShapeDodecagon=146
+msoShape6pointStar=147
+msoShape7pointStar=148
+msoShape10pointStar=149
+msoShape12pointStar=150
+msoShapeRound1Rectangle=151
+msoShapeRound2SameRectangle=152
+msoShapeSnipRoundRectangle=154
+msoShapeSnip1Rectangle=155
+msoShapeSnip2SameRectangle=156
+msoShapeRound2DiagRectangle=157
+msoShapeSnip2DiagRectangle=157
+msoShapeFrame=158
+msoShapeHalfFrame=159
+msoShapeTear=160
+msoShapeChord=161
+msoShapeCorner=162
+msoShapeMathPlus=163
+msoShapeMathMinus=164
+msoShapeMathMultiply=165
+msoShapeMathDivide=166
+msoShapeMathEqual=167
+msoShapeMathNotEqual=168
+msoShapeCornerTabs=169
+msoShapeSquareTabs=170
+msoShapePlaqueTabs=171
+msoShapeGear6=172
+msoShapeGear9=173
+msoShapeFunnel=174
+msoShapePieWedge=175
+msoShapeLeftCircularArrow=176
+msoShapeLeftRightCircularArrow=177
+msoShapeSwooshArrow=178
+msoShapeCloud=179
+msoShapeChartX=180
+msoShapeChartStar=181
+msoShapeChartPlus=182
+msoShapeLineInverse=183
+
+msoShapeTypeLabels={
+    # Translators: a Microsoft Word Shape type
+    msoShapeMixed:_("a combination of other shapes"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRectangle:_("Rectangle"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeParallelogram:_("Parallelogram"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeTrapezoid:_("Trapezoid"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDiamond:_("Diamond"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRoundedRectangle:_("Rounded rectangle"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeOctagon:_("Octagon"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeIsoscelesTriangle:_("Isosceles triangle"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRightTriangle:_("Right triangle"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeOval:_("Oval"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeHexagon:_("Hexagon"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCross:_("Cross"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRegularPentagon:_("Pentagon"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCan:_("Can"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCube:_("Cube"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeBevel:_("Bevel"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFoldedCorner:_("Folded corner"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeSmileyFace:_("Smiley face"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDonut:_("Donut"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeNoSymbol:_("No symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeBlockArc:_("Block arc"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeHeart:_("Heart"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLightningBolt:_("Lightning bolt"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeSun:_("Sun"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeMoon:_("Moon"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeArc:_("Arc"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDoubleBracket:_("Double bracket"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDoubleBrace:_("Double brace"),
+    # Translators: a Microsoft Word Shape type
+    msoShapePlaque:_("Plaque"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftBracket:_("Left bracket"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRightBracket:_("Right bracket"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftBrace:_("Left brace"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRightBrace:_("Right brace"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRightArrow:_("Block arrow that points right"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftArrow:_("Block arrow that points left"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeUpArrow:_("Block arrow that points up"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDownArrow:_("Block arrow that points down"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftRightArrow:_("Block arrow with arrowheads that point both left and right"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeUpDownArrow:_("Block arrow that points up and down"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeQuadArrow:_("Block arrows that point up, down, left, and right"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftRightUpArrow:_("Block arrow with arrowheads that point left, right, and up"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeBentArrow:_("Block arrow that follows a curved 90-degree angle"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeUTurnArrow:_("Block arrow forming a U shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftUpArrow:_("Block arrow with arrowheads that point left and up"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeBentUpArrow:_("Block arrow that follows a sharp 90-degree angle. Points up by default"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCurvedRightArrow:_("Block arrow that curves right"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCurvedLeftArrow:_("Block arrow that curves left"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCurvedUpArrow:_("Block arrow that curves up"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCurvedDownArrow:_("Block arrow that curves down"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeStripedRightArrow:_("Block arrow that points right with stripes at the tail"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeNotchedRightArrow:_("Notched block arrow that points right"),
+    # Translators: a Microsoft Word Shape type
+    msoShapePentagon:_("Pentagon"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeChevron:_("Chevron"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRightArrowCallout:_("Callout with arrow that points right"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftArrowCallout:_("Callout with arrow that points left"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeUpArrowCallout:_("Callout with arrow that points up"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDownArrowCallout:_("Callout with arrow that points down"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftRightArrowCallout:_("Callout with arrowheads that point both left and right"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeUpDownArrowCallout:_("Callout with arrows that point up and down"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeQuadArrowCallout:_("Callout with arrows that point up, down, left, and right"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCircularArrow:_("Block arrow that follows a curved 180-degree angle"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartProcess:_("Process flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartAlternateProcess:_("Alternate process flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartDecision:_("Decision flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartData:_("Data flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartPredefinedProcess:_("Predefined process flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartInternalStorage:_("Internal storage flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartDocument:_("Document flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartMultidocument:_("Multi-document flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartTerminator:_("Terminator flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartPreparation:_("Preparation flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartManualInput:_("Manual input flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartManualOperation:_("Manual operation flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartConnector:_("Connector flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartOffpageConnector:_("Off-page connector flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartCard:_("Card flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartPunchedTape:_("Punched tape flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartSummingJunction:_("Summing junction flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartOr:_("Or flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartCollate:_("Collate flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartSort:_("Sort flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartExtract:_("Extract flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartMerge:_("Merge flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartStoredData:_("Stored data flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartDelay:_("Delay flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartSequentialAccessStorage:_("Sequential access storage flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartMagneticDisk:_("Magnetic disk flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartDirectAccessStorage:_("Direct access storage flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartDisplay:_("Display flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeExplosion1:_("Explosion"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeExplosion2:_("Explosion"),
+    # Translators: a Microsoft Word Shape type
+    msoShape4pointStar:_("4-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShape5pointStar:_("5-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShape8pointStar:_("8-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShape16pointStar:_("16-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShape24pointStar:_("24-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShape32pointStar:_("32-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeUpRibbon:_("Ribbon banner with center area above ribbon ends"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDownRibbon:_("Ribbon banner with center area below ribbon ends"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCurvedUpRibbon:_("Ribbon banner that curves up"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCurvedDownRibbon:_("Ribbon banner that curves down"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeVerticalScroll:_("Vertical scroll"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeHorizontalScroll:_("Horizontal scroll"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeWave:_("Wave"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDoubleWave:_("Double wave"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRectangularCallout:_("Rectangular callout"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRoundedRectangularCallout:_("Rounded rectangle-shaped callout"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeOvalCallout:_("Oval-shaped callout"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCloudCallout:_("Cloud callout"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout1:_("Callout with border and horizontal callout line"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout2:_("Callout with diagonal straight line"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout3:_("Callout with angled line"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout4:_("Callout with callout line segments forming a U-shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout1AccentBar:_("Callout with horizontal accent bar"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout2AccentBar:_("Callout with diagonal callout line and accent bar"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout3AccentBar:_("Callout with angled callout line and accent bar"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout4AccentBar:_("Callout with accent bar and callout line segments forming a U-shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout1NoBorder:_("Callout with horizontal line"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout2NoBorder:_("Callout with no border and diagonal callout line"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout3NoBorder:_("Callout with no border and angled callout line"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout4NoBorder:_("Callout with no border and callout line segments forming a U-shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout1BorderandAccentBar:_("Callout with border and horizontal accent bar"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout2BorderandAccentBar:_("Callout with border, diagonal straight line, and accent bar"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout3BorderandAccentBar:_("Callout with border, angled callout line, and accent bar"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineCallout4BorderandAccentBar:_("Callout with border, accent bar, and callout line segments forming a U-shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonCustom:_("Button with no default picture or text. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonHome:_("Home button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonHelp:_("Help button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonInformation:_("Information button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonBackorPrevious:_("Back or Previous button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonForwardorNext:_("Forward or Next button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonBeginning:_("Beginning button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonEnd:_("End button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonReturn:_("Return button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonDocument:_("Document button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonSound:_("Sound button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeActionButtonMovie:_("Movie button. Supports mouse-click and mouse-over actions"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeBalloon:_("Balloon"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeNotPrimitive:_("Not supported"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFlowchartOfflineStorage:_("Offline storage flowchart symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftRightRibbon:_("Ribbon with an arrow at both ends"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDiagonalStripe:_("Rectangle with two triangles-shapes removed; a diagonal stripe"),
+    # Translators: a Microsoft Word Shape type
+    msoShapePie:_("    Circle (pie) with a portion missing"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeNonIsoscelesTrapezoid:_("Trapezoid with asymmetrical non-parallel sides"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDecagon:_("Decagon"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeHeptagon:_("Heptagon"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeDodecagon:_("Dodecagon"),
+    # Translators: a Microsoft Word Shape type
+    msoShape6pointStar:_("6-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShape7pointStar:_("7-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShape10pointStar:_("10-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShape12pointStar:_("12-point star"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRound1Rectangle:_("Rectangle with one rounded corner"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRound2SameRectangle:_("Rectangle with two-rounded corners that share a side"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeSnipRoundRectangle:_("Rectangle with one snipped corner and one rounded corner"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeSnip1Rectangle:_("Rectangle with one snipped corner"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeSnip2SameRectangle:_("Rectangle with two snipped corners that share a side"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeRound2DiagRectangle:_("Rectangle with two rounded corners, diagonally-opposed"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeSnip2DiagRectangle:_("Rectangle with two snipped corners, diagonally-opposed"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFrame:_("Rectangular picture frame"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeHalfFrame:_("Half of a rectangular picture frame"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeTear:_("Water droplet"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeChord:_("Circle with a line connecting two points on the perimeter through the interior of the circle; a circle with a chord"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCorner:_("Rectangle with rectangular-shaped hole"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeMathPlus:_("Addition symbol '+'"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeMathMinus:_("Subtraction symbol '-'"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeMathMultiply:_("Multiplication symbol 'x'"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeMathDivide:_("Division symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeMathEqual:_("Equivalence symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeMathNotEqual:_("Non-equivalence symbol"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCornerTabs:_("Four right triangles aligning along a rectangular path; four 'snipped' corners"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeSquareTabs:_("Four small squares that define a rectangular shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapePlaqueTabs:_("Four quarter-circles defining a rectangular shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeGear6:_("Gear with six teeth"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeGear9:_("Gear with nine teet"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeFunnel:_("Funnel"),
+    # Translators: a Microsoft Word Shape type
+    msoShapePieWedge:_("Quarter of a circular shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftCircularArrow:_("Circular arrow pointing counter-clockwise"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLeftRightCircularArrow:_("Circular arrow pointing clockwise and counter-clockwise; a curved arrow with points at both ends"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeSwooshArrow:_("Curved arrow"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeCloud:_("Cloud shape"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeChartX:_("Square divided into four parts along diagonal lines"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeChartStar:_("Square divided six parts along vertical and diagonal lines"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeChartPlus:_("Square divided vertically and horizontally into four quarters"),
+    # Translators: a Microsoft Word Shape type
+    msoShapeLineInverse:_("Line inverse"),
+    }
 
 wdNoRevision=0
 wdRevisionInsert=1
@@ -311,6 +873,27 @@ class WordDocumentRevisionQuickNavItem(WordDocumentCollectionQuickNavItem):
 		text=(self.collectionItem.range.text or "")[:100]
 		return _(u"{revisionType} {description}: {text} by {author} on {date}").format(revisionType=revisionType,author=author,text=text,date=date,description=description)
 
+class WordDocumentSmartArtQuickNavItem(WordDocumentCollectionQuickNavItem):
+	@property
+	def label(self):
+		try:
+			if self.collectionItem.Title:
+				text=self.collectionItem.Title
+			elif self.collectionItem.Name:
+				text=self.collectionItem.Name
+			else:
+				text=_("smartart {rangeStart}:{rangeEnd}").format(rangeStart=self.collectionItem.range.Start, rangeEnd=self.collectionItem.range.End)
+		except:
+			text=_("smartart {rangeStart}:{rangeEnd}").format(rangeStart=self.collectionItem.range.Start, rangeEnd=self.collectionItem.range.End)
+		return _(u"{text}").format(text=text)
+
+	def rangeFromCollectionItem(self,item):
+		return item.range
+
+	def moveTo(self):
+		NVDAObj = WordSmartArt(windowHandle=self.document.rootNVDAObject.windowHandle, wordApplicationObject=self.rangeObj.Document.Application, wordShapeObject=self.collectionItem)
+		eventHandler.queueEvent("gainFocus",NVDAObj)
+	
 class WinWordCollectionQuicknavIterator(object):
 	"""
 	Allows iterating over an MS Word collection (e.g. HyperLinks) emitting L{QuickNavItem} objects.
@@ -398,6 +981,13 @@ class TableWinWordCollectionQuicknavIterator(WinWordCollectionQuicknavIterator):
 		return rangeObj.tables
 	def filter(self,item):
 		return item.borders.enable
+
+class SmartArtWinWordCollectionQuicknavIterator(WinWordCollectionQuicknavIterator):
+	quickNavItemClass=WordDocumentSmartArtQuickNavItem
+	def collectionFromRange(self,rangeObj):
+		return rangeObj.inlineShapes
+	def filter(self,item):
+		return item.type==wdInlineShapeSmartArt
 
 class WordDocumentTextInfo(textInfos.TextInfo):
 
@@ -530,6 +1120,8 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 			role=controlTypes.ROLE_ENDNOTE
 		elif role=="graphic":
 			role=controlTypes.ROLE_GRAPHIC
+		elif role=="smartart":
+			role=controlTypes.ROLE_SMARTART
 		elif role=="object":
 			progid=field.get("progid")
 			if progid and progid.startswith("Equation.DSMT"):
@@ -855,6 +1447,8 @@ class WordDocumentTreeInterceptor(browseMode.BrowseModeDocumentTreeInterceptor):
 			 return GraphicWinWordCollectionQuicknavIterator(nodeType,self,direction,rangeObj,includeCurrent).iterate()
 		elif nodeType.startswith('heading'):
 			return self._iterHeadings(nodeType,direction,rangeObj,includeCurrent)
+		elif nodeType=="smartart":
+			return SmartArtWinWordCollectionQuicknavIterator(nodeType,self,direction,rangeObj,includeCurrent).iterate()
 		else:
 			raise NotImplementedError
 
@@ -1430,10 +2024,124 @@ class WordDocument_WwN(WordDocument):
 		"kb:shift+tab":None,
 	}
 
+class WordSmartArt(Window):
+    def __init__(self,windowHandle, wordApplicationObject, wordShapeObject, currentNodeIndex=0):
+        self.windowHandle=windowHandle
+        self.wordApplicationObject=wordApplicationObject
+        self.wordShapeObject=wordShapeObject
+        self.wordSmartArtObject=self.wordShapeObject.SmartArt
+        self.currentNodeIndex=currentNodeIndex
+        self.totalNodeCount=self.wordSmartArtObject.Nodes.Count
+        super(WordSmartArt,self).__init__(windowHandle=windowHandle)
+
+    def _get_role(self):
+        return controlTypes.ROLE_SMARTART
+
+#     def event_gainFocus(self):
+#         self.wordShapeObject.Select()
+#         self.reportSmartArtSummary()
+
+    def _get_name(self):
+        if self.totalNodeCount>0:
+            if self.totalNodeCount==1:
+                # Translators: Indicates that there is 1 node in smartart.
+                text = _( "There is 1 node in this smart art" )
+            else:
+                # Translators: Indicates the number of nodes in smartart.
+                text = _( "There are %d nodes in this smart art" ) %(self.totalNodeCount)
+        if self.wordSmartArtObject.Layout.Name:
+            # Translators: Indicates the Layout Name of SmartArt.
+            text += ", " + _("Smart art layout {name} ").format(name=self.wordSmartArtObject.Layout.Name)
+        return text
+
+    def script_nextNode(self, gesture):
+        if self.currentNodeIndex == self.totalNodeCount-1:
+            self.currentNodeIndex=0
+        else:
+            self.currentNodeIndex = self.currentNodeIndex + 1
+        obj=WordSmartArtNode(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordShapeObject=self.wordShapeObject, currentNodeIndex=self.currentNodeIndex)
+        eventHandler.queueEvent('gainFocus',obj)
+    script_nextNode.canPropagate=True
+
+    def script_previousNode(self, gesture):
+        if self.currentNodeIndex == 0:
+            self.currentNodeIndex=self.totalNodeCount-1
+        else:
+            self.currentNodeIndex = self.currentNodeIndex - 1
+        obj=WordSmartArtNode(windowHandle=self.windowHandle, wordApplicationObject=self.wordApplicationObject, wordShapeObject=self.wordShapeObject, currentNodeIndex=self.currentNodeIndex)
+        eventHandler.queueEvent('gainFocus',obj)
+    script_previousNode.canPropagate=True
+
+    def script_activatePosition(self,gesture):
+        # Toggle browse mode pass-through.
+        self.passThrough = True
+        self.ignoreTreeInterceptorPassThrough=False
+        browseMode.reportPassThrough(self)
+    # Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
+    script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
+    script_activatePosition.category=inputCore.SCRCAT_BROWSEMODE
+
+    def script_disablePassThrough(self, gesture):
+        eventHandler.executeEvent("gainFocus", api.getDesktopObject().objectWithFocus())
+
+    __gestures={
+#         "kb:leftArrow":"previousNode",
+        "kb:downArrow":"previousNode",
+#         "kb:rightArrow":"nextNode",
+        "kb:upArrow":"nextNode",
+        "kb:enter": "activatePosition",
+        "kb(desktop):numpadEnter":"activatePosition",
+        "kb:space": "activatePosition",
+        "kb:escape": "disablePassThrough",
+    }
+
+class WordSmartArtNode(WordSmartArt):
+    def __init__(self,windowHandle, wordApplicationObject, wordShapeObject, currentNodeIndex):
+        super(WordSmartArtNode, self).__init__(windowHandle=windowHandle, wordApplicationObject=wordApplicationObject, wordShapeObject=wordShapeObject, currentNodeIndex=currentNodeIndex)
+
+#     def event_gainFocus(self):
+# #         self.wordSmartArtObject.AllNodes(self.currentNodeIndex+1).Select()
+#         self.reportNodeSummary()
+
+    def _get_name(self):
+        text= _( "node {index}, ".format(index=self.currentNodeIndex+1))
+        if (self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Shapes.AutoShapeType==msoShapeMixed) and (self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Shapes.Count > 1):
+            for j in xrange(1, self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Shapes.Count + 1):
+                text += _("shape {index} {shapeString}, ".format(index=j, shapeString=msoShapeTypeLabels.get(self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Shapes(j).AutoShapeType)) )
+        else:
+            text += _("shape {shapeString}, ".format(shapeString=msoShapeTypeLabels.get(self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Shapes.AutoShapeType)) )
+        try:
+            if self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).TextFrame2.TextRange.Text:
+                text += _( "text {textString}. ").format(textString=self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).TextFrame2.TextRange.Text)
+        except:
+            pass
+        childNodesCount=self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Nodes.Count
+        if childNodesCount == 1:
+        	text += _("It has one child node")
+        	text += _("child node {index}, shape {shapeString}, ".format(index=1, shapeString=msoShapeTypeLabels.get(self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Nodes(1).Shapes.AutoShapeType)))
+        	try:
+        		if self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Nodes(1).TextFrame2.TextRange.Text:
+        			text += _( "text {textString} ").format(textString=self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Nodes(1).TextFrame2.TextRange.Text)
+        	except:
+        		pass
+        elif childNodesCount > 1:
+            text += _("It has {childCount} child nodes: ".format(childCount=childNodesCount))
+            for i in xrange(1,childNodesCount+1):
+                text += _("child node {index}, shape {shapeString}, ".format(index=i, shapeString=msoShapeTypeLabels.get(self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Nodes(i).Shapes.AutoShapeType)))
+                try:
+                    if self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Nodes(i).TextFrame2.TextRange.Text:
+                        text += _( "text {textString} ").format(textString=self.wordSmartArtObject.Nodes(self.currentNodeIndex+1).Nodes(i).TextFrame2.TextRange.Text)
+                except:
+                    pass
+        return text
+
 class ElementsListDialog(browseMode.ElementsListDialog):
 
 	ELEMENT_TYPES=(browseMode.ElementsListDialog.ELEMENT_TYPES[0],browseMode.ElementsListDialog.ELEMENT_TYPES[1],
 		# Translators: The label of a radio button to select the type of element
 		# in the browse mode Elements List dialog.
 		("annotation", _("&Annotations")),
+		# Translators: The label of a radio button to select the type of element
+		# in the browse mode Elements List dialog.
+		("smartart", _("&SmartArt")),
 	)
