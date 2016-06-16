@@ -148,6 +148,7 @@ ROLE_HEADERITEM=141
 ROLE_THUMB=142
 ROLE_CALENDAR=143
 ROLE_SMARTART=144
+ROLE_SMARTARTNODE=145
 
 STATE_UNAVAILABLE=0X1
 STATE_FOCUSED=0X2
@@ -482,6 +483,8 @@ roleLabels={
 	ROLE_CALENDAR:_("calendar"),
 	# Translators: Identifies a smart art object.
 	ROLE_SMARTART:_("smart art"),
+	# Translators: Identifies a smart art node.
+	ROLE_SMARTARTNODE:_("smartart node"),
 }
 
 stateLabels={
