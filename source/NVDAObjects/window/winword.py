@@ -1,6 +1,6 @@
 #appModules/winword.py
 #A part of NonVisual Desktop Access (NVDA)
-#Copyright (C) 2006-2015 NV Access Limited, Manish Agrawal
+#Copyright (C) 2006-2015 NV Access Limited, Manish Agrawal, Aviral Jain
 #This file is covered by the GNU General Public License.
 #See the file COPYING for more details.
 
@@ -301,6 +301,14 @@ class WordDocumentCommentQuickNavItem(WordDocumentCollectionQuickNavItem):
 	def rangeFromCollectionItem(self,item):
 		return item.scope
 
+class WordDocumentSpellingerrorQuickNavItem(WordDocumentCollectionQuickNavItem):
+	@property
+	def label(self):
+		return self.collectionItem.text
+
+	def rangeFromCollectionItem(self,item):
+		return item
+
 class WordDocumentRevisionQuickNavItem(WordDocumentCollectionQuickNavItem):
 	@property
 	def label(self):
@@ -381,6 +389,11 @@ class CommentWinWordCollectionQuicknavIterator(WinWordCollectionQuicknavIterator
 	quickNavItemClass=WordDocumentCommentQuickNavItem
 	def collectionFromRange(self,rangeObj):
 		return rangeObj.comments
+
+class SpellingerrorsWinWordCollectionQuicknavIterator(WinWordCollectionQuicknavIterator):
+	quickNavItemClass=WordDocumentSpellingerrorQuickNavItem
+	def collectionFromRange(self,rangeObj):
+		return rangeObj.SpellingErrors
 
 class RevisionWinWordCollectionQuicknavIterator(WinWordCollectionQuicknavIterator):
 	quickNavItemClass=WordDocumentRevisionQuickNavItem
@@ -1436,4 +1449,7 @@ class ElementsListDialog(browseMode.ElementsListDialog):
 		# Translators: The label of a radio button to select the type of element
 		# in the browse mode Elements List dialog.
 		("annotation", _("&Annotations")),
+		# Translators: The label of a radio button to select the type of element
+		# in the browse mode Elements List dialog.
+		("spelling",_("&Spelling Errors"))
 	)
