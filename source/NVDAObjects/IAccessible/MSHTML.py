@@ -34,6 +34,10 @@ import gui
 from ConfigParser import SafeConfigParser
 import os
 import globalVars
+import NVDAHelper
+import XMLFormatting
+import time
+import virtualBuffers
 
 IID_IHTMLElement=comtypes.GUID('{3050F1FF-98B5-11CF-BB82-00AA00BDCE0B}')
 
@@ -579,7 +583,7 @@ class MSHTML(IAccessible):
 				self._HTMLNodeSupportsTextRanges=False
 		if self._HTMLNodeSupportsTextRanges:
 			return MSHTMLTextInfo
-		return super(MSHTML,self).TextInfo
+		return None
 
 	def isDuplicateIAccessibleEvent(self,obj):
 		if not super(MSHTML,self).isDuplicateIAccessibleEvent(obj):
@@ -630,23 +634,46 @@ class MSHTML(IAccessible):
  		parsed_uri = urlparse( weblink )
  		domain='{uri.netloc}'.format(uri=parsed_uri)
   		domain=domain.replace('.','_')
+  		domain=domain.replace(':','_')
+  		domain=domain.replace('\\','_')
   		filename=domain+'.ini'
+  		#filename="testing.ini"
   		return filename
 	
 	def getCustomLabel(self,nameAttribute):
 		filename=self.getFilenameFromElementDomain()
+# 		log.info("\nFilename is:%s\n",filename)
+# 		log.info("\nName attribute1 is: %s\n",nameAttribute)
 		config = SafeConfigParser()
 		config.read(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename))
 		try:
 			if config.get('Section', str(nameAttribute)):
 				return config.get('Section', str(nameAttribute))
-		except:
+		except Exception as e:
+			log.info("\nError is:%s\n",e)
 			pass
-
+		
 	def _get_name(self):
 		nameAttribute=self.HTMLAttributes['name']
-		name=self.getCustomLabel(nameAttribute)
+# 		log.info("\nCombo Box Testing: %s\n",nameAttribute)
+#  		if self.HTMLAttributes['href']:
+# 			log.info("\nLink attribute: %s\n",self.HTMLAttributes['href'])
+# 		if self.HTMLAttributes['src']:
+# 			log.info("\nImage Source attribute: %s\n",self.HTMLAttributes['src'])
+  		if (self.HTMLNode.nodeName=="A"):
+  			nameAttribute=self.HTMLAttributes['href']
+  			nameAttribute=nameAttribute.replace(':','')
+  			nameAttribute=nameAttribute.replace('/','')
+  			nameAttribute=nameAttribute.replace('.','')
+			#nameAttribute=nameAttribute.sub(r'[^\w.]', '', string)
+# 		log.info("\nName attribute is: %s\n",nameAttribute)
+ 		name=self.getCustomLabel(nameAttribute)
+#  		self.accName=self.getCustomLabel(nameAttribute)
+# 		log.info("\nIAcc name is: %s\n",self.accName)
+# 		#log.info("\nName is: %s\n",name)
 		if name:
+# 			log.info("Inside if")
+# 			log.info("\nName is: %s\n",name)
 			return name
 		
 		ariaLabelledBy=self.HTMLAttributes['aria-labelledBy']
@@ -1000,10 +1027,33 @@ class MSHTML(IAccessible):
 			return ti.getControlFieldForNVDAObject(self)["language"]
 		except LookupError:
 			return None
-		
+
 	def script_assignCustomLabel(self, gesture):
 		nameAttribute=self.HTMLAttributes['name']
+		#log.info("\nCombo Box Testing2: %s\n",nameAttribute)
+	    ######################################################
+		linkAttribute=self.HTMLAttributes['href']
+		if linkAttribute:
+			linkAttribute=linkAttribute.replace(':','')
+			linkAttribute=linkAttribute.replace('/','')
+			linkAttribute=linkAttribute.replace('.','')
+		#linkAttribute=linkAttribute.sub(r'[^\w.]', '', string)
+# 		log.info("\nIs link: %s\n",self.HTMLNode.nodeName)
+# 		log.info("\nLink attribute: %s\n",linkAttribute)
+# 		start=self._startOffset
+# 		end=self._endOffset
+# 		text=NVDAHelper.VBuf_getTextInRange(self.obj.rootNVDAObject.VBufHandle,start,end,True)
+# 		if not text:
+# 			return ""
+# 		commandList=XMLFormatting.XMLTextParser().parse(text)
+# 		for index in xrange(len(commandList)):
+# 			if isinstance(commandList[index],textInfos.FieldCommand):
+# 				field=commandList[index].field
+# 		imgAttribute=field.get('HTMLAttrib::src')
+# 		log.info("\nImage source attribute: %s\n",imgAttribute)
+	    #######################################################
 		filename=self.getFilenameFromElementDomain()
+		#filename="testing"
 		config = SafeConfigParser()
 		
 		if not os.path.exists(os.path.join(globalVars.appArgs.configPath, "webLabels")):
@@ -1018,20 +1068,25 @@ class MSHTML(IAccessible):
 		except Exception as e:
 			defaultCustomLabel=u""
 		
-		d = wx.TextEntryDialog(gui.mainFrame, 
+		if nameAttribute or linkAttribute:
+			d = wx.TextEntryDialog(gui.mainFrame, 
 			# Translators: Dialog text for 
 			_("Custom Label Edit"),
 			# Translators: Title of a dialog edit an Excel comment 
 			_("Custom Label"),
 			defaultValue=defaultCustomLabel,
 			style=wx.TE_MULTILINE|wx.OK|wx.CANCEL)
-		def callback(result):
-			if result == wx.ID_OK:
-				config.set('Section', nameAttribute, d.Value)
-				with open(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename),'w') as configfile:
-					config.write(configfile)
-		gui.runScriptModalDialog(d, callback)
-			
+			#btn1 = wx.Button(d, label = "Delete") 
+			def callback(result):
+				if result == wx.ID_OK:
+					if (self.HTMLNode.nodeName=="A"):
+						config.set('Section', linkAttribute, d.Value)
+# 						virtualBuffers.VirtualBuffer.changeNotify(self.rootDocHandle,self.rootID)
+					else:
+						config.set('Section', nameAttribute, d.Value)
+					with open(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename),'w') as configfile:
+						config.write(configfile)
+			gui.runScriptModalDialog(d, callback)
 			
 	__gestures = {
 		"kb:NVDA+control+tab": "assignCustomLabel",

@@ -456,7 +456,6 @@ inline void getAttributesFromHTMLDOMNode(IHTMLDOMNode* pHTMLDOMNode,wstring& nod
 	} else if(nodeName.compare(L"INPUT")==0) {
 		macro_addHTMLAttributeToMap(L"type",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
 		macro_addHTMLAttributeToMap(L"value",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
-		macro_addHTMLAttributeToMap(L"name",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
 	} else if(nodeName.compare(L"TD")==0||nodeName.compare(L"TH")==0) {
 		macro_addHTMLAttributeToMap(L"headers",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
 		macro_addHTMLAttributeToMap(L"colspan",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
@@ -490,6 +489,7 @@ inline void getAttributesFromHTMLDOMNode(IHTMLDOMNode* pHTMLDOMNode,wstring& nod
 	macro_addHTMLAttributeToMap(L"aria-relevant",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
 	macro_addHTMLAttributeToMap(L"aria-busy",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
 	macro_addHTMLAttributeToMap(L"aria-atomic",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
+	macro_addHTMLAttributeToMap(L"name",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
 	
 	pHTMLAttributeCollection2->Release();
 }

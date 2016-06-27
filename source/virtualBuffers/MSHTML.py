@@ -21,6 +21,7 @@ import api
 import aria
 import config
 import watchdog
+import XMLFormatting
 
 FORMATSTATE_INSERTED=1
 FORMATSTATE_DELETED=2
@@ -55,10 +56,16 @@ class MSHTMLTextInfo(VirtualBufferTextInfo):
 		nodeName=attrs.get('IHTMLDOMNode::nodeName',"") 
 		
 		nameAttribute=attrs.get('HTMLAttrib::name')
+		#ui.message("Combo box test1"+nameAttribute)
+# 		log.info("\nCombo box testing 1: %s\n",nameAttribute)
 		customLabel=self.obj.rootNVDAObject.getCustomLabel(nameAttribute)
-		log.info("\nCustomLabel is: %s\n",customLabel)
 		if customLabel:
 			attrs["name"]=customLabel
+# 		log.info("\nChecking: %s\n",attrs.get('HTMLAttrib::href'))
+			
+# 		if attrs.get('HTMLAttrib::src'):
+# 			log.info("\nImage source: %s\n",attrs.get('HTMLAttrib::src'))
+		
 		
 		ariaRoles=attrs.get("HTMLAttrib::role", "").split(" ")
 		#choose role
@@ -145,6 +152,25 @@ class MSHTMLTextInfo(VirtualBufferTextInfo):
 		if description:
 			attrs["description"]=description
 		return super(MSHTMLTextInfo,self)._normalizeControlField(attrs)
+	
+ 	def getTextWithFields(self,formatConfig=None):
+ 		start=self._startOffset
+		end=self._endOffset	
+		if start==end:
+			return ""
+		text=NVDAHelper.VBuf_getTextInRange(self.obj.VBufHandle,start,end,True)
+		if not text:
+			return ""
+		commandList=XMLFormatting.XMLTextParser().parse(text)
+		for index in xrange(len(commandList)):
+			if isinstance(commandList[index],textInfos.FieldCommand):
+				field=commandList[index].field
+# 				log.info("\nField is: %s\n",field)
+				if isinstance(field,textInfos.ControlField):
+					commandList[index].field=self._normalizeControlField(field)
+				elif isinstance(field,textInfos.FormatField):
+					commandList[index].field=self._normalizeFormatField(field)
+		return commandList
 
 class MSHTML(VirtualBuffer):
 
