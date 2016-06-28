@@ -202,6 +202,7 @@ void VBufBackend_t::update() {
 		for(VBufStorage_controlFieldNodeList_t::iterator i=tempSubtreeList.begin();i!=tempSubtreeList.end();++i) {
 			VBufStorage_controlFieldNode_t* node=*i;
 			LOG_DEBUG(L"re-rendering subtree at "<<node);
+			LOG_INFO(L"Node is: "<<node);
 			VBufStorage_buffer_t* tempBuf=new VBufStorage_buffer_t();
 			nhAssert(tempBuf); //tempBuf can't be NULL
 			LOG_DEBUG(L"Created temp buffer at "<<tempBuf);

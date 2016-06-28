@@ -37,6 +37,27 @@ import nvwave
 import treeInterceptorHandler
 import watchdog
 
+from urlparse import urlparse
+# import wx
+# import gui
+from ConfigParser import SafeConfigParser
+import os
+import globalVars
+# import NVDAHelper
+# import XMLFormatting
+# import time
+# import virtualBuffers
+from urlparse import urlparse
+import wx
+import gui
+from ConfigParser import SafeConfigParser
+import os
+import globalVars
+import NVDAHelper
+import XMLFormatting
+import time
+import virtualBuffers
+
 VBufStorage_findDirection_forward=0
 VBufStorage_findDirection_back=1
 VBufStorage_findDirection_up=2
@@ -360,13 +381,43 @@ class VirtualBuffer(browseMode.BrowseModeDocumentTreeInterceptor):
 		return bool(self.VBufHandle and not self.isLoading)
 
 	def loadBuffer(self):
+		log.info("\nBuffer update called.\n")
 		self.isLoading = True
 		self._loadProgressCallLater = wx.CallLater(1000, self._loadProgress)
 		threading.Thread(target=self._loadBuffer).start()
 
 	def _loadBuffer(self):
 		try:
-			self.VBufHandle=NVDAHelper.localLib.VBuf_createBuffer(self.rootNVDAObject.appModule.helperLocalBindingHandle,self.rootDocHandle,self.rootID,unicode(self.backendName))
+			########################################
+			log.info("\nload buffer called: %s\n",self)
+# 			weblink=getattr(self.rootNVDAObject.HTMLNode.document,'url',"")
+#  			parsed_uri = urlparse( weblink )
+#  		 	domain='{uri.netloc}'.format(uri=parsed_uri)
+#   		 	domain=domain.replace('.','_')
+#   		  	domain=domain.replace(':','_')
+#   		  	domain=domain.replace('\\','_')
+#   		  	filename=domain+'.ini'
+			filename="www_freedomscientific_com.ini"
+  		  	labels={}
+  		  	log.info("\nLabels: %s\n",labels)
+  		  	config = SafeConfigParser()
+		  	config.read(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename))
+		  	#labels_p=ctypes.pointer()
+		  	try:
+		  		options = config.options('Section')
+		  		for option in options:
+# 		  		log.info("\nOption is: %s\n",option)
+		  			labels[option]=config.get('Section', option)
+		  		if isinstance(labels, dict):
+				  	# Single option.
+				  	log.info("\nis dictionary object.\n")
+					labels = (labels,)
+		  		log.info("\nLabels: %s\n",labels)
+		  		#labels_p=ctypes.pointer(labels)
+		  	except Exception as e:
+		  		pass
+			########################################
+			self.VBufHandle=NVDAHelper.localLib.VBuf_createBuffer(self.rootNVDAObject.appModule.helperLocalBindingHandle,self.rootDocHandle,self.rootID,unicode(self.backendName),unicode(labels))
 			if not self.VBufHandle:
 				raise RuntimeError("Could not remotely create virtualBuffer")
 		except:
@@ -686,6 +737,71 @@ class VirtualBuffer(browseMode.BrowseModeDocumentTreeInterceptor):
 			if fieldId == objId:
 				return item.field
 		raise LookupError
+	
+# 	def script_assignCustomLabel(self, gesture):
+# 		log.info("\nSelf from virtual buffer is: %s\n",self.obj.rootNVDAObject)
+# 		nameAttribute=self.HTMLAttributes['name']
+# 		#log.info("\nCombo Box Testing2: %s\n",nameAttribute)
+# 	    ######################################################
+# 		linkAttribute=self.HTMLAttributes['href']
+# 		if linkAttribute:
+# 			linkAttribute=linkAttribute.replace(':','')
+# 			linkAttribute=linkAttribute.replace('/','')
+# 			linkAttribute=linkAttribute.replace('.','')
+# 		#linkAttribute=linkAttribute.sub(r'[^\w.]', '', string)
+# # 		log.info("\nIs link: %s\n",self.HTMLNode.nodeName)
+# # 		log.info("\nLink attribute: %s\n",linkAttribute)
+# # 		start=self._startOffset
+# # 		end=self._endOffset
+# # 		text=NVDAHelper.VBuf_getTextInRange(self.obj.rootNVDAObject.VBufHandle,start,end,True)
+# # 		if not text:
+# # 			return ""
+# # 		commandList=XMLFormatting.XMLTextParser().parse(text)
+# # 		for index in xrange(len(commandList)):
+# # 			if isinstance(commandList[index],textInfos.FieldCommand):
+# # 				field=commandList[index].field
+# # 		imgAttribute=field.get('HTMLAttrib::src')
+# # 		log.info("\nImage source attribute: %s\n",imgAttribute)
+# 	    #######################################################
+# 		filename=self.getFilenameFromElementDomain()
+# 		#filename="testing"
+# 		config = SafeConfigParser()
+# 		
+# 		if not os.path.exists(os.path.join(globalVars.appArgs.configPath, "webLabels")):
+# 			os.makedirs(os.path.join(globalVars.appArgs.configPath, "webLabels"))
+# 			
+# 		config.read(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename))
+# 		if not config.has_section('Section'):
+# 			config.add_section('Section')
+# 			
+# 		try:
+# 			defaultCustomLabel=config.get('Section', str(nameAttribute))
+# 		except Exception as e:
+# 			defaultCustomLabel=u""
+# 		
+# 		if nameAttribute or linkAttribute:
+# 			d = wx.TextEntryDialog(gui.mainFrame, 
+# 			# Translators: Dialog text for 
+# 			_("Custom Label Edit"),
+# 			# Translators: Title of a dialog edit an Excel comment 
+# 			_("Custom Label"),
+# 			defaultValue=defaultCustomLabel,
+# 			style=wx.TE_MULTILINE|wx.OK|wx.CANCEL)
+# 			#btn1 = wx.Button(d, label = "Delete") 
+# 			def callback(result):
+# 				if result == wx.ID_OK:
+# 					if (self.HTMLNode.nodeName=="A"):
+# 						config.set('Section', linkAttribute, d.Value)
+# # 						virtualBuffers.VirtualBuffer.changeNotify(self.rootDocHandle,self.rootID)
+# 					else:
+# 						config.set('Section', nameAttribute, d.Value)
+# 					with open(os.path.join(globalVars.appArgs.configPath, "webLabels\%s" % filename),'w') as configfile:
+# 						config.write(configfile)
+# 			gui.runScriptModalDialog(d, callback)
+# 			
+# # 	__gestures = {
+# # 		"kb:NVDA+control+tab": "assignCustomLabel",
+# # 		}
 
 	__gestures = {
 		"kb:NVDA+f5": "refreshBuffer",
@@ -694,4 +810,5 @@ class VirtualBuffer(browseMode.BrowseModeDocumentTreeInterceptor):
 		"kb:control+alt+upArrow": "previousRow",
 		"kb:control+alt+rightArrow": "nextColumn",
 		"kb:control+alt+leftArrow": "previousColumn",
+# 		"kb:NVDA+control+tab": "assignCustomLabel",
 	}

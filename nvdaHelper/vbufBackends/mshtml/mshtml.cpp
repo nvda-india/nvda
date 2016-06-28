@@ -760,6 +760,24 @@ VBufStorage_fieldNode_t* MshtmlVBufBackend_t::fillVBuf(VBufStorage_buffer_t* buf
 		wstring s=getTextFromHTMLDOMNode(pHTMLDOMNode,allowPreformattedText,(parentNode&&parentNode->isBlock&&!previousNode));
 		if(!s.empty()) {
 			LOG_DEBUG(L"Got text from node");
+			//////////////////////////////////////////
+			LOG_INFO(L"Got text from node: "<<s);
+			map<wstring,wstring> attribsMapCheck;
+			LOG_INFO(L"Trying to get IHTMLDOMNode::nodeName");
+				if(pHTMLDOMNode->get_nodeName(&tempBSTR)!=S_OK||!tempBSTR) {
+					LOG_INFO(L"Failed to get IHTMLDOMNode::nodeName");
+					return NULL;
+				}
+				wstring nodeName=tempBSTR;
+				SysFreeString(tempBSTR);
+				tempBSTR=NULL;
+				for(wstring::iterator i=nodeName.begin();i!=nodeName.end();++i)
+					*i=towupper(*i);
+				LOG_INFO(L"Got IHTMLDOMNode::nodeName of "<<nodeName);
+			getAttributesFromHTMLDOMNode(pHTMLDOMNode,nodeName,attribsMapCheck);
+			wstring check=attribsMapCheck.find(L"HTMLAttrib::href");
+			LOG_INFO(L"Got attrib from node: "<<check);
+			/////////////////////////////////////////////
 			VBufStorage_textFieldNode_t* textNode=buffer->addTextFieldNode(parentNode,previousNode,s);
 			fillTextFormattingForTextNode(parentNode,textNode);
 			return textNode;
