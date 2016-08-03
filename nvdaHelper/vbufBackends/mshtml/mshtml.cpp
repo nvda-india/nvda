@@ -432,6 +432,7 @@ inline void getCurrentStyleInfoFromHTMLDOMNode(IHTMLDOMNode* pHTMLDOMNode, bool&
 }
 
 inline void getAttributesFromHTMLDOMNode(IHTMLDOMNode* pHTMLDOMNode,wstring& nodeName, map<wstring,wstring>& attribsMap) {
+//inline void getAttributesFromHTMLDOMNode(IHTMLDOMNode* pHTMLDOMNode,wstring& nodeName, map<wstring,wstring>& attribsMap,map<wstring,wstring>& labelsMap) {
 	int res=0;
 	IDispatch* pDispatch=NULL;
 	LOG_DEBUG(L"Getting IHTMLDOMNode::attributes");
@@ -441,6 +442,7 @@ inline void getAttributesFromHTMLDOMNode(IHTMLDOMNode* pHTMLDOMNode,wstring& nod
 	}
 	IHTMLAttributeCollection2* pHTMLAttributeCollection2=NULL;
 	res=pDispatch->QueryInterface(IID_IHTMLAttributeCollection2,(void**)&pHTMLAttributeCollection2);
+	//LOG_INFO(L"pHTMLAttributeCollection2: "<<pHTMLAttributeCollection2);
 	pDispatch->Release();
 	if(res!=S_OK) {
 		LOG_DEBUG(L"Could not get IHTMLAttributesCollection2");
@@ -453,6 +455,44 @@ inline void getAttributesFromHTMLDOMNode(IHTMLDOMNode* pHTMLDOMNode,wstring& nod
 		macro_addHTMLAttributeToMap(L"summary",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
 	} else if(nodeName.compare(L"A")==0) {
 		macro_addHTMLAttributeToMap(L"href",true,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
+//		/////////////////////////////////////////////////////////////////////////////////////////////
+//		//LOG_INFO(L"tempVar.bstrVal: "<<tempVar.bstrVal);
+//		wstring wLinkAttribute=wstring(tempVar.bstrVal,SysStringLen(tempVar.bstrVal));
+//		wstring linkAttribute;
+//		for (wstring::const_iterator it = wLinkAttribute.begin(); it != wLinkAttribute.end(); ++it)
+//		{
+//			 if (*it != L':' && *it != L'/' && *it != L'.')
+//			 {
+//				 linkAttribute.push_back(*it);
+//			 }
+//		}
+//		LOG_INFO(L"linkAttribute: "<<linkAttribute);
+////		linkAttribute=linkAttribute.replace(':','');
+////		linkAttribute=linkAttribute.replace('/','');
+////		linkAttribute=linkAttribute.replace('.','');
+//		for(std::map<wstring, wstring>::const_iterator it = labelsMap.begin(); it != labelsMap.end(); it++)
+//		{
+//			LOG_INFO(L"it->first outside: "<<it->first);
+//			if(linkAttribute.compare(it->first)==0)
+//			{
+//				LOG_INFO(L"it->first: "<<it->first);
+//				LOG_INFO(L"Compared");
+////				wstring ws=it->first;
+////				VARIANT vt;
+////				VariantInit(&vt); // initialize the variant
+////				vt.vt = VT_BSTR; // set to BSTR string
+////				vt.bstrVal = SysAllocString(ws);
+////				BSTR bs = SysAllocStringLen(ws.data(), ws.size());
+////				CString t(it->second.c_str());
+////				VARIANT var;
+////				var.vt=VT_BSTR;
+////				var.bstrVal=t.AllocSysString();
+//				//LOG_INFO(L"var is: "<<it->var);
+//				//pHTMLAttributeCollection2->setNamedItem();
+//				//macro_addHTMLAttributeToMap(L"name",true,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
+//			}
+//		}
+//		/////////////////////////////////////////////////////////////////////////////////////////////
 	} else if(nodeName.compare(L"INPUT")==0) {
 		macro_addHTMLAttributeToMap(L"type",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
 		macro_addHTMLAttributeToMap(L"value",false,pHTMLAttributeCollection2,attribsMap,tempVar,tempAttribNode);
@@ -758,26 +798,85 @@ VBufStorage_fieldNode_t* MshtmlVBufBackend_t::fillVBuf(VBufStorage_buffer_t* buf
 	//Handle text nodes
 	if(!shouldSkipText) { 
 		wstring s=getTextFromHTMLDOMNode(pHTMLDOMNode,allowPreformattedText,(parentNode&&parentNode->isBlock&&!previousNode));
+////		////////////////////////////////////////////////
+		LOG_INFO(L"In fillVbuf");
+//////		LOG_INFO(L"s is "<<s);
+//		map<wstring,wstring> attribsMapCheck;
+//		map<wstring,wstring>::const_iterator tempIterCheck;
+//		//			LOG_INFO(L"Trying to get IHTMLDOMNode::nodeName");
+//						if(pHTMLDOMNode->get_nodeName(&tempBSTR)!=S_OK||!tempBSTR) {
+//							LOG_INFO(L"Failed to get IHTMLDOMNode::nodeName");
+//							return NULL;
+//						}
+//						wstring nodeName=tempBSTR;
+//						SysFreeString(tempBSTR);
+//						tempBSTR=NULL;
+//						for(wstring::iterator i=nodeName.begin();i!=nodeName.end();++i)
+//							*i=towupper(*i);
+////						LOG_INFO(L"Got IHTMLDOMNode::nodeName of "<<nodeName);
+//					getAttributesFromHTMLDOMNode(pHTMLDOMNode,nodeName,attribsMapCheck);
+//
+//////					//////////////////////////mapping attribMap to labelMap///////////////
+////					tempIterCheck=attribsMapCheck.find(L"HTMLAttrib::href");
+////					if (tempIterCheck!=attribsMapCheck.end())
+////					{
+////						LOG_INFO(L"tempIterCheck:"<<tempIterCheck.second);
+////					}
+//					for(std::map<wstring, wstring>::const_iterator it = attribsMapCheck.begin(); it != attribsMapCheck.end(); it++)
+//					{
+//
+//						if (it->first.compare(L"HTMLAttrib::href")==0)
+//						{
+//							LOG_INFO(L"first:"<<it->first);
+//							for(std::map<wstring, wstring>::const_iterator it_l = labelsMap.begin(); it_l != labelsMap.end(); it_l++)
+//							{
+//									wstring key = it_l->first;
+//									wstring value = it_l->second;
+////								    LOG_INFO(L"Label Map key: "<<key);
+////									LOG_INFO(L"Label Map value: "<<value);
+//									wstring wLinkAttribute=it->second;
+//									wstring linkAttribute;
+//									for (wstring::const_iterator it_link = wLinkAttribute.begin(); it_link != wLinkAttribute.end(); ++it_link)
+//											{
+//												 if (*it_link != L':' && *it_link != L'/' && *it_link != L'.')
+//												 {
+//													 linkAttribute.push_back(*it);
+//												 }
+//											}
+//							}
+//
+//						}
+//
+////						//if(tempIterCheck.compare(it_l->first)==0)
+////						{
+////							//LOG_INFO(L"Compared");
+////							//attribsMapCheck.find(L"HTMLAttrib::id")==it_l->second;
+////							//attribsMapCheck[L"HTMLAttrib::id"]==it_l->second;
+////						}
+////					}
+//
+//					//////////////////////////////////////////////////////////////////////
+//
+////					for(std::map<wstring, wstring>::const_iterator it = attribsMapCheck.begin(); it != attribsMapCheck.end(); it++)
+////						{
+////							wstring key = it->first;
+////							wstring value = it->second;
+////							LOG_INFO(L"Map key: "<<key);
+////							LOG_INFO(L"Map value: "<<value);
+////						}
+////					tempIterCheck=attribsMapCheck.find(L"HTMLAttrib::href");
+////					for(std::map<wstring, wstring>::const_iterator it = labelsMap.begin(); it != labelsMap.end(); it++)
+////											{
+////												wstring key = it->first;
+////												wstring value = it->second;
+////												LOG_INFO(L"Label Map key: "<<key);
+////												LOG_INFO(L"Label Map value: "<<value);
+////											}
+////					//LOG_INFO(L"Href attrib is: "<<tempIterCheck->first);
+//
+//		/////////////////////////////////////////////////
 		if(!s.empty()) {
 			LOG_DEBUG(L"Got text from node");
-			//////////////////////////////////////////
-			LOG_INFO(L"Got text from node: "<<s);
-			map<wstring,wstring> attribsMapCheck;
-			LOG_INFO(L"Trying to get IHTMLDOMNode::nodeName");
-				if(pHTMLDOMNode->get_nodeName(&tempBSTR)!=S_OK||!tempBSTR) {
-					LOG_INFO(L"Failed to get IHTMLDOMNode::nodeName");
-					return NULL;
-				}
-				wstring nodeName=tempBSTR;
-				SysFreeString(tempBSTR);
-				tempBSTR=NULL;
-				for(wstring::iterator i=nodeName.begin();i!=nodeName.end();++i)
-					*i=towupper(*i);
-				LOG_INFO(L"Got IHTMLDOMNode::nodeName of "<<nodeName);
-			getAttributesFromHTMLDOMNode(pHTMLDOMNode,nodeName,attribsMapCheck);
-			wstring check=attribsMapCheck.find(L"HTMLAttrib::href");
-			LOG_INFO(L"Got attrib from node: "<<check);
-			/////////////////////////////////////////////
 			VBufStorage_textFieldNode_t* textNode=buffer->addTextFieldNode(parentNode,previousNode,s);
 			fillTextFormattingForTextNode(parentNode,textNode);
 			return textNode;
@@ -831,6 +930,7 @@ VBufStorage_fieldNode_t* MshtmlVBufBackend_t::fillVBuf(VBufStorage_buffer_t* buf
 
 	//Collect needed HTML attributes
 	getAttributesFromHTMLDOMNode(pHTMLDOMNode,nodeName,attribsMap);
+	//getAttributesFromHTMLDOMNode(pHTMLDOMNode,nodeName,attribsMap,labelsMap);
 
 	//Find out if this node is editable
 	BOOL isEditable=false;
@@ -1006,11 +1106,47 @@ if(!(formatState&FORMATSTATE_INSERTED)&&nodeName.compare(L"INS")==0) {
 		IAName=tempIter->second;
 	}
 
+//	LOG_INFO(L"node Name is:"<<nodeName);
+//	LOG_INFO(L"attribute is there? "<<(attribsMap.find(L"HTMLAttrib::href")==attribsMap.end()?"true":"false"));
+
 	//IE exposes state_linked for anchors with no href, this is wrong
 	if((nodeName.compare(L"A")==0)&&(attribsMap.find(L"HTMLAttrib::href")==attribsMap.end())) {
 		if(IAStates&STATE_SYSTEM_LINKED) IAStates-=STATE_SYSTEM_LINKED;
 		if(IAStates&STATE_SYSTEM_FOCUSABLE) IAStates-=STATE_SYSTEM_FOCUSABLE;
+
+		tempIter = attribsMap.find(L"HTMLAttrib::href");
+		wstring contentString=getNameForURL(tempIter->second);
 	}
+
+	//////////////////////////////////////////////////////////
+//	if((nodeName.compare(L"A")==0)&&(attribsMap.find(L"HTMLAttrib::href")!=attribsMap.end())) {
+//			tempIter = attribsMap.find(L"HTMLAttrib::href");
+//			wstring wLinkAttribute=tempIter->second;
+//			wstring linkAttribute;
+//			for (wstring::const_iterator it = wLinkAttribute.begin(); it != wLinkAttribute.end(); ++it)
+//			{
+//					if (*it != L':' && *it != L'/' && *it != L'.')
+//					{
+//						linkAttribute.push_back(*it);
+//					}
+//			}
+////			wstring contentString=getNameForURL(tempIter->second);
+////			LOG_INFO(L"checking content href:"<<tempIter->second);
+////			LOG_INFO(L"checking content string:"<<contentString);
+//			for(std::map<wstring, wstring>::const_iterator it = labelsMap.begin(); it != labelsMap.end(); it++)
+//			{
+//					wstring key = it->first;
+//				    wstring value = it->second;
+//				    if (linkAttribute.compare(key)==0)
+//				    {
+//				    	LOG_INFO(L"PLEASE");
+//				    	wstring contentString=it->second;
+//				    	LOG_INFO(L"checking content string:"<<contentString);
+//				    }
+//			}
+//
+//		}
+	/////////////////////////////////////////////////////////
 
 	// Whether this is the root node.
 	bool isRoot=ID==this->rootID;
@@ -1090,7 +1226,8 @@ if(!(formatState&FORMATSTATE_INSERTED)&&nodeName.compare(L"INS")==0) {
 				// There is alt text, so use it.
 				contentString = tempIter->second;
 			}
-		} else if ((tempIter = attribsMap.find(L"HTMLAttrib::title")) != attribsMap.end()) {
+		}
+		else if ((tempIter = attribsMap.find(L"HTMLAttrib::title")) != attribsMap.end()) {
 			// There is a title, so use it.
 			contentString = tempIter->second;
 		} else if (ignoreInteractiveUnlabelledGraphics)
@@ -1143,14 +1280,48 @@ if(!(formatState&FORMATSTATE_INSERTED)&&nodeName.compare(L"INS")==0) {
 	} else if(nodeName.compare(L"BR")==0) {
 		LOG_DEBUG(L"node is a br tag, adding a line feed as its text.");
 		contentString=L"\n";
-	} else if((!isRoot&&(IARole==ROLE_SYSTEM_APPLICATION||IARole==ROLE_SYSTEM_DIALOG))
+	}
+	else if((!isRoot&&(IARole==ROLE_SYSTEM_APPLICATION||IARole==ROLE_SYSTEM_DIALOG))
 		||IARole==ROLE_SYSTEM_OUTLINE
 		||nodeName.compare(L"MATH")==0
 	) {
 		contentString=L" ";
-	} else {
+	}
+	///////////////////////////////////////////////////////
+				else if((nodeName.compare(L"A")==0)&&(attribsMap.find(L"HTMLAttrib::href")!=attribsMap.end())) {
+							tempIter = attribsMap.find(L"HTMLAttrib::href");
+							wstring wLinkAttribute=tempIter->second;
+							wstring linkAttribute;
+							for (wstring::const_iterator it = wLinkAttribute.begin(); it != wLinkAttribute.end(); ++it)
+							{
+									if (*it != L':' && *it != L'/' && *it != L'.')
+									{
+										linkAttribute.push_back(*it);
+									}
+							}
+				//			wstring contentString=getNameForURL(tempIter->second);
+				//			LOG_INFO(L"checking content href:"<<tempIter->second);
+				//			LOG_INFO(L"checking content string:"<<contentString);
+							for(std::map<wstring, wstring>::const_iterator it = labelsMap.begin(); it != labelsMap.end(); it++)
+							{
+									wstring key = it->first;
+								    wstring value = it->second;
+								    if (linkAttribute.compare(key)==0)
+								    {
+								    	LOG_INFO(L"PLEASE");
+								    	contentString=it->second;
+								    	//renderChildren=true;
+								    	LOG_INFO(L"checking content string:"<<contentString);
+								    }
+							}
+
+						}
+				//////////////////////////////////////////////////////
+	else {
 		renderChildren=true;
 	}
+
+	LOG_INFO(L"checking content string again:"<<contentString);
 
 	//If the name isn't being rendered as the content, add the name as a field attribute
 	// if it came from the author (not content).
@@ -1162,6 +1333,7 @@ if(!(formatState&FORMATSTATE_INSERTED)&&nodeName.compare(L"INS")==0) {
 
 	//Add a textNode to the buffer containing any special content retreaved
 	if(!hidden&&!contentString.empty()) {
+		LOG_INFO(L"checking content string before adding to buffer:"<<contentString);
 		previousNode=buffer->addTextFieldNode(parentNode,previousNode,contentString);
 		fillTextFormattingForNode(pHTMLDOMNode,previousNode);
 	}
@@ -1251,6 +1423,7 @@ if(!(formatState&FORMATSTATE_INSERTED)&&nodeName.compare(L"INS")==0) {
 				tempIter=attribsMap.find(L"HTMLAttrib::href");
 				if(tempIter!=attribsMap.end()&&!tempIter->second.empty()) {
 					contentString=getNameForURL(tempIter->second);
+//					LOG_INFO(L"checking content string1:"<<contentString);
 				}
 			}
 			if(!contentString.empty()) {

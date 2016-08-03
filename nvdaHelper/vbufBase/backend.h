@@ -21,6 +21,8 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 #include "storage.h"
 #include <common/lock.h>
 
+#include <map>
+
 class VBufBackend_t;
 
 typedef std::set<VBufBackend_t*> VBufBackendSet_t;
@@ -60,6 +62,8 @@ static LRESULT CALLBACK destroy_callWndProcHook(int code, WPARAM wParam, LPARAM 
  * the list is in the order the invalidations were requested.
  */
 	VBufStorage_controlFieldNodeList_t invalidSubtreeList;
+
+
 
 	protected:
 
@@ -114,6 +118,10 @@ static LRESULT CALLBACK destroy_callWndProcHook(int code, WPARAM wParam, LPARAM 
  */
 	virtual ~VBufBackend_t();
 
+	///////////////////////////////////////////
+		std::map<std::wstring,std::wstring> labelsMap;
+		//////////////////////////////////////////
+
 	public:
 
 /**
@@ -127,7 +135,7 @@ static LRESULT CALLBACK destroy_callWndProcHook(int code, WPARAM wParam, LPARAM 
 /**
  * Initializes the state of the backend and performs an initial rendering of content.
  */
-	virtual void initialize();
+	virtual void initialize(const wchar_t* labels);
 
 /**
  * identifies the window or document where the backend starts rendering from

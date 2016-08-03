@@ -54,6 +54,19 @@ class MSHTMLTextInfo(VirtualBufferTextInfo):
 		accRole=int(accRole) if isinstance(accRole,basestring) and accRole.isdigit() else accRole
 		nodeName=attrs.get('IHTMLDOMNode::nodeName',"")
 		ariaRoles=attrs.get("HTMLAttrib::role", "").split(" ")
+		#########################################
+# 		nameAttribute=attrs.get('HTMLAttrib::name')
+# 		linkAttribute=attrs.get('HTMLAttrib::href')
+# 		if linkAttribute:
+# 			linkAttribute=linkAttribute.replace(':','')
+# 			linkAttribute=linkAttribute.replace('/','')
+# 			linkAttribute=linkAttribute.replace('.','')
+# 			customLabel=self.obj.rootNVDAObject.getCustomLabel(linkAttribute)
+# 			if customLabel:
+# 				attrs["name"]=customLabel
+		#log.info("\nAttribte name: %s\n",nameAttribute)
+ 		#log.info("\nAttribte href: %s\n",attrs.get('HTMLAttrib::href'))
+		#########################################
 		#choose role
 		#Priority is aria role -> HTML tag name -> IAccessible role
 		role=next((aria.ariaRolesToNVDARoles[ar] for ar in ariaRoles if ar in aria.ariaRolesToNVDARoles),controlTypes.ROLE_UNKNOWN)
@@ -353,3 +366,11 @@ class MSHTML(VirtualBuffer):
 		except COMError:
 			pass
 		return super(MSHTML, self).shouldPassThrough(obj, reason)
+	
+	def getUrl(self):
+# 		url=getattr(self.rootNVDAObject.HTMLNode.document,'url',"").split('#')
+# 		url=getattr(self.HTMLNode.document,'url',"")
+		try:
+			return self.rootNVDAObject.HTMLNode.document.url
+		except COMError:
+			return None

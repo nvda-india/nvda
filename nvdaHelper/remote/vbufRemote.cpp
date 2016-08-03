@@ -17,6 +17,8 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 #include <vbufBase/backend.h>
 #include "dllmain.h"
 
+#include <common/log.h>
+
 using namespace std;
 
 map<VBufBackend_t*,HINSTANCE> backendLibHandles;
@@ -40,7 +42,7 @@ VBufRemote_bufferHandle_t VBufRemote_createBuffer(handle_t bindingHandle, int do
 		return NULL;
 	}
 	backendLibHandles[backend]=backendLibHandle;
-	backend->initialize();
+	backend->initialize(labels);
 	return (VBufRemote_bufferHandle_t)backend;
 }
 

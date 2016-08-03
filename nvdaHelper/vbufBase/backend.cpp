@@ -21,6 +21,9 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 #include "storage.h"
 #include "backend.h"
 
+//#include <iostream>
+//#include <string>
+
 using namespace std;
 
 const UINT VBufBackend_t::wmRenderThreadInitialize=RegisterWindowMessage(L"VBufBackend_t::wmRenderThreadInitialize");
@@ -32,7 +35,68 @@ VBufBackend_t::VBufBackend_t(int docHandleArg, int IDArg): renderThreadID(GetWin
 	LOG_DEBUG(L"Initializing backend with docHandle "<<docHandleArg<<L", ID "<<IDArg);
 }
 
-void VBufBackend_t::initialize() {
+void VBufBackend_t::initialize(const wchar_t* labels) {
+//	std::string labelsStr(labels->begin(),labels->end())
+//	labelsStr.replace("(",labelsStr.length(),"");
+	LOG_INFO(L"Labels from backend are: "<<labels);
+	//labelsMap=labels;
+	/////////////////////////////////////
+		  // converting wchar_t * to wstring
+		  wstring labelsStr=wstring(labels);
+		  LOG_INFO(L"Labels string is: "<<labelsStr);
+
+//		 //wstring to map
+		  wstring str, key;
+		  	bool inEscape = false;
+
+		  	//LOG_INFO(L"Labels String start: "<<*labelsStr.begin());
+		  	//LOG_INFO(L"Labels String end: "<<*(labelsStr.end()-1));
+
+		  	for (wstring::const_iterator it = labelsStr.begin(); it != labelsStr.end(); ++it) {
+		  		//LOG_INFO(L"It is :"<<*it);
+		  		if (inEscape) {
+		  			str.push_back(*it);
+		  			inEscape = false;
+		  			//LOG_INFO(L"In escape if");
+		  		} else if (*it == L'\\') {
+		  			inEscape = true;
+		  			//LOG_INFO(L"In \\ if");
+		  		} else if (*it == L':') {
+		  			// We're about to move on to the value, so save the key and clear str.
+		  			key = str;
+		  			str.clear();
+		  			//LOG_INFO(L"In : if");
+		  			//LOG_INFO(L"Key is: "<<key);
+		  		} else if (*it == L',' || *it == L';' || *it == L'}') {
+		  			// We're about to move on to a new attribute or another value for the same attribute.
+		  			// In either case, the current value ends here.
+		  			// Add this key/value pair to the map.
+		  			if (!key.empty()) {
+		  				labelsMap.insert(pair<wstring, wstring>(key, str));
+		  				//LOG_INFO(L"Value is: "<<str);
+		  				if (*it == L';') {
+		  					// We're about to move on to a new attribute.
+		  					key.clear();
+		  				}
+		  			}
+		  			str.clear();
+		  			//LOG_INFO(L"In , ; if");
+		  		} else if (*it == '{' || *it == L'\'' || *it == L'\'') {
+
+		  		} else {
+		  			str.push_back(*it);
+		  			//LOG_INFO(L"In else");
+		  		}
+		  	}
+//		  	LOG_INFO(L"Map Size: "<<labelsMap.size());
+//		  for(std::map<wstring, wstring>::const_iterator it = labelsMap.begin(); it != labelsMap.end(); it++)
+//		  							{
+//		  								wstring key = it->first;
+//		  								wstring value = it->second;
+//		  								LOG_INFO(L"Labels key: "<<key);
+//		  								LOG_INFO(L"Labels value: "<<value);
+//		  							}
+	///////////////////////////////////
 	int renderThreadID=GetWindowThreadProcessId((HWND)UlongToHandle(rootDocHandle),NULL);
 	LOG_DEBUG(L"render threadID "<<renderThreadID);
 	registerWindowsHook(WH_CALLWNDPROC,destroy_callWndProcHook);

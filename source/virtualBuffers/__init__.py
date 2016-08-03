@@ -389,15 +389,22 @@ class VirtualBuffer(browseMode.BrowseModeDocumentTreeInterceptor):
 	def _loadBuffer(self):
 		try:
 			########################################
-			log.info("\nload buffer called: %s\n",self)
-# 			weblink=getattr(self.rootNVDAObject.HTMLNode.document,'url',"")
-#  			parsed_uri = urlparse( weblink )
-#  		 	domain='{uri.netloc}'.format(uri=parsed_uri)
-#   		 	domain=domain.replace('.','_')
-#   		  	domain=domain.replace(':','_')
-#   		  	domain=domain.replace('\\','_')
-#   		  	filename=domain+'.ini'
-			filename="www_freedomscientific_com.ini"
+# 			log.info("\nload buffer called: %s\n",self.documentConstantIdentifier)
+  			weblink=self.documentConstantIdentifier
+#   			weblink=weblink.replace('.','_')
+#    		  	weblink=weblink.replace(':','_')
+#    		  	weblink=weblink.replace('\\','_')
+  			parsed_uri = urlparse( weblink )
+  		 	domain='{uri.netloc}'.format(uri=parsed_uri)
+   		 	domain=domain.replace('.','_')
+   		  	domain=domain.replace(':','_')
+   		  	domain=domain.replace('\\','_')
+   		  	filename=domain+'.ini'
+   		  	log.info("\nfilename is: %s\n",filename)
+# 			filename="www_freedomscientific_com.ini"
+#  			filename="savingsaccount_icicibank_com.ini"
+#  			filename="onlineapply_sbi_co_in.ini"
+# 			filename=weblink
   		  	labels={}
   		  	log.info("\nLabels: %s\n",labels)
   		  	config = SafeConfigParser()
@@ -411,7 +418,7 @@ class VirtualBuffer(browseMode.BrowseModeDocumentTreeInterceptor):
 		  		if isinstance(labels, dict):
 				  	# Single option.
 				  	log.info("\nis dictionary object.\n")
-					labels = (labels,)
+# 					labels = (labels,)
 		  		log.info("\nLabels: %s\n",labels)
 		  		#labels_p=ctypes.pointer(labels)
 		  	except Exception as e:
@@ -802,6 +809,12 @@ class VirtualBuffer(browseMode.BrowseModeDocumentTreeInterceptor):
 # # 	__gestures = {
 # # 		"kb:NVDA+control+tab": "assignCustomLabel",
 # # 		}
+
+	def getUrl(self):
+		"""Retrieve the url os the webpage.
+		Subclasses must override this method.
+		"""
+		raise NotImplementedError
 
 	__gestures = {
 		"kb:NVDA+f5": "refreshBuffer",
