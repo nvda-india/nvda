@@ -554,12 +554,12 @@ class UIA(Window):
 	def _get_states(self):
 		states=set()
 		e=self.UIACachedStatesElement
-		try:
-			hasKeyboardFocus=e.cachedHasKeyboardFocus
-		except COMError:
-			hasKeyboardFocus=False
-		if hasKeyboardFocus:
-			states.add(controlTypes.STATE_FOCUSED)
+# 		try:
+# 			hasKeyboardFocus=e.cachedHasKeyboardFocus
+# 		except COMError:
+# 			hasKeyboardFocus=False
+# 		if hasKeyboardFocus:
+# 			states.add(controlTypes.STATE_FOCUSED)
 		if e.cachedIsKeyboardFocusable:
 			states.add(controlTypes.STATE_FOCUSABLE)
 		if e.cachedIsPassword:

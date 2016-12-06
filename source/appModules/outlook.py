@@ -29,6 +29,9 @@ from NVDAObjects.IAccessible.MSHTML import MSHTML
 from NVDAObjects.behaviors import RowWithFakeNavigation
 from NVDAObjects.UIA import UIA
 
+from NVDAObjects.window.winword import WordDocument_WwN
+import NVDAObjects
+
 importanceLabels={
 	# Translators: for a high importance email
 	2:_("high importance"),
@@ -153,6 +156,9 @@ class AppModule(appModuleHandler.AppModule):
 				clsList.insert(0,SuperGridClient2010)
 		if (windowClassName == "AfxWndW" and controlID==109) or (windowClassName in ("WeekViewWnd","DayViewWnd")):
 			clsList.insert(0,CalendarView)
+ 		if windowClassName in ("_WwN"):
+ 			if (self.outlookVersion >=15 and NVDAObjects.window.winword.WordDocument_WwN in clsList):
+ 				clsList.remove(NVDAObjects.window.winword.WordDocument_WwN)		
 
 class REListBox20W_CheckBox(IAccessible):
 
