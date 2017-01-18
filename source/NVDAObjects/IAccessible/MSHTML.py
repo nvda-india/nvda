@@ -28,7 +28,8 @@ from .. import InvalidNVDAObject
 from ..window import Window
 from NVDAObjects.UIA import UIA, UIATextInfo
 
-from urlparse import urlparse
+#from urlparse import urlparse
+from urlparse import urlparse,urljoin
 import wx
 import gui
 from ConfigParser import SafeConfigParser
@@ -36,6 +37,10 @@ import os
 import globalVars
 import treeInterceptorHandler
 import configobj
+
+import requests
+import json
+import ui
 
 IID_IHTMLElement=comtypes.GUID('{3050F1FF-98B5-11CF-BB82-00AA00BDCE0B}')
 
@@ -1028,6 +1033,14 @@ class MSHTML(IAccessible):
 		browseObj=info.NVDAObjectAtStart
 		if (browseObj.HTMLNode.nodeName=="IMG"):
 			customLabelKey=browseObj.HTMLAttributes['src']
+			#############################################
+			weblink=getattr(self.HTMLNode.document,'url',"")
+			#parsed_uri = urlparse( weblink )
+			#log.info("Parsed URI: %s",str(parsed_uri))
+			#log.info("Normalized Path: %s",os.path.abspath(customLabelKey))
+			#log.info("Path: %s",str(urljoin(weblink, customLabelKey)))
+			imageUrl=str(urljoin(weblink, customLabelKey))
+			###############################################
 		elif (browseObj.HTMLNode.nodeName=="A"):
 			customLabelKey=browseObj.HTMLAttributes['href']
 		else:
@@ -1050,21 +1063,111 @@ class MSHTML(IAccessible):
 		except Exception as e:
 			defaultCustomLabel=u""
 		if customLabelKey:
-			d = wx.TextEntryDialog(gui.mainFrame, 
-			# Translators: Dialog text for 
-			_("Custom Label Edit"),
-			_("Custom Label"),
-			defaultValue=defaultCustomLabel,
-			style=wx.TE_MULTILINE|wx.OK|wx.CANCEL)
+# 			customLabelDialog(None)
+			if (browseObj.HTMLNode.nodeName=="IMG"):
+				d=customLabelDialog(None,imageUrl)
+			else: 
+				d = customLabelDialog(None,None)
 			def callback(result):
 				if result == wx.ID_OK:
-					config[customLabelKey] = d.Value
-					config.write()
-			gui.runScriptModalDialog(d, callback)
-		
+ 					config[customLabelKey] = d.labelEdit.GetValue()
+ 					config.write()
+        	gui.runScriptModalDialog(d, callback)
+# 			def run():
+# 				gui.mainFrame.prePopup()
+# 				d = customLabelDialog(None)
+# 				d.ShowModal()
+# 				d.Destroy()
+# 				gui.mainFrame.postPopup()
+# 			wx.CallAfter(run)
+# 			def callback(result):
+# 				if result == wx.ID_OK:
+# 					config[customLabelKey] = d.Value
+# 					config.write()
+#         	gui.runScriptModalDialog(d, callback)
+        	
+# 			d = wx.TextEntryDialog(gui.mainFrame, 
+# 			# Translators: Dialog text for 
+# 			_("Custom Label Edit"),
+# 			_("Custom Label"),
+# 			defaultValue=defaultCustomLabel,
+# 			style=wx.TE_MULTILINE|wx.OK|wx.CANCEL)
+#  			
+# # 			gui.mainFrame.btn1 = wx.Button(d, label = "Enter Text") 
+# #       		gui.mainFrame.Bind(wx.EVT_BUTTON, gui.mainFrame.OnButton, gui.mainFrame.btn1)
+#        		
+#       		def callback(result):
+#       			if result == wx.ID_OK:
+# 					config[customLabelKey] = d.Value
+# 					config.write()
+#        		gui.runScriptModalDialog(d, callback)
+	
 	__gestures = {
 		"kb:NVDA+control+tab": "assignCustomLabel",
 		}
+
+class customLabelDialog(wx.Dialog):
+	def __init__(self, document,imageUrl):
+		self.document = document
+		self.imageUrl=imageUrl
+		# Translators: The title of the browse mode Elements List dialog.
+		super(customLabelDialog, self).__init__(gui.mainFrame, wx.ID_ANY, _("Custom Label"))
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+		contentsSizer = wx.BoxSizer(wx.VERTICAL)
+		bHelper = gui.guiHelper.ButtonHelper(wx.HORIZONTAL)
+		
+		labelText = _("Custom Label")
+		labeledCtrl = gui.guiHelper.LabeledControlHelper(self, labelText, wx.TextCtrl)
+		self.labelEdit = labeledCtrl.control
+# 		self.filterEdit.Bind(wx.EVT_TEXT, self.onFilterEditTextChange)
+		contentsSizer.Add(labeledCtrl.sizer)
+		contentsSizer.AddSpacer(gui.guiHelper.SPACE_BETWEEN_VERTICAL_DIALOG_ITEMS)
+		
+		# Translators: The label of a button to activate an element
+		# in the browse mode Elements List dialog.
+		self.descriptionButton = bHelper.addButton(self, label=_("Get Description"))
+		self.descriptionButton.Bind(wx.EVT_BUTTON, lambda evt: self.onAction(True))
+		
+		# Translators: The label of a button to move to an element
+		# in the browse mode Elements List dialog.
+# 		self.moveButton = bHelper.addButton(self, label=_("&Move to"))
+# 		self.moveButton.Bind(wx.EVT_BUTTON, lambda evt: self.onAction(False))
+		bHelper.addButton(self, id=wx.ID_OK)
+		bHelper.addButton(self, id=wx.ID_CANCEL)
+
+		contentsSizer.Add(bHelper.sizer, flag=wx.ALIGN_RIGHT)
+
+		mainSizer.Add(contentsSizer, border=gui.guiHelper.BORDER_FOR_DIALOGS, flag=wx.ALL)
+		mainSizer.Fit(self)
+		self.SetSizer(mainSizer)
+		
+	def onAction(self, activate):
+# 		log.info("Working")
+		payload = {'visualFeatures': 'Description'}
+		#files = {'file': open('IMG_1496.JPG', 'rb')}
+# 		files = {'url':'https://oxfordportal.blob.core.windows.net/vision/Analysis/3.jpg'}
+		files = {'url':self.imageUrl}
+		headers={}
+		headers={ 'Ocp-Apim-Subscription-Key': '360e1fb469ae48d39387882cd38fbca6'}
+
+		http_proxy  = "http://10.10.78.21:3128"
+		https_proxy = "https://10.10.78.21:3128"
+		ftp_proxy   = "ftp://10.10.78.21:3128"
+
+		proxyDict = { 
+              "http"  : http_proxy, 
+              "https" : https_proxy,
+              "ftp"   : ftp_proxy
+              }
+
+		#r = requests.post('https://api.projectoxford.ai/vision/v1.0/describe', params=payload,files=files,headers=headers,proxies=proxyDict)
+		r = requests.post('https://api.projectoxford.ai/vision/v1.0/describe', params=payload,json=files,headers=headers,proxies=proxyDict,verify=False)
+		data = json.loads(r.text)
+		dscr=data['description']
+		s=dscr['captions']
+		s1=s[0]
+		log.info(s1['text']+str(s1['confidence']))
+		ui.browseableMessage("Description : "+s1['text']+"\n"+"Confidence : "+str(s1['confidence']) , _("Image Description"))
 
 class V6ComboBox(IAccessible):
 	"""The object which receives value change events for combo boxes in MSHTML/IE 6.
